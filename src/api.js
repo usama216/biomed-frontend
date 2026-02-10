@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'http://localhost:5000');
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://biomed-backend.vercel.app');
 
 export async function createCheckoutSession(items, successUrl, cancelUrl, customer) {
   const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
