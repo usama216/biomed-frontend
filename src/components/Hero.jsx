@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { fetchBanners } from '../api';
+
+const DEFAULT_SLIDES = [
+  '/assets/hero-section-banner/banner-image-14.jpeg',
+  '/assets/hero-section-banner/banner-image-15.jpeg',
+  '/assets/hero-section-banner/banner-image-16.jpeg',
+  '/assets/hero-section-banner/banner-image-6.jpg',
+  '/assets/hero-section-banner/banner-image-1.jpg',
+];
 
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  
-  const slides = [
-    '/assets/hero-section-banner/banner-image-14.jpeg',
-    '/assets/hero-section-banner/banner-image-15.jpeg',
+  const [slides, setSlides] = useState(DEFAULT_SLIDES);
 
-    // '/assets/hero-section-banner/banner-image-10.jpeg',
-    '/assets/hero-section-banner/banner-image-6.jpg',
-    '/assets/hero-section-banner/banner-image-1.jpg',
-    '/assets/hero-section-banner/banner-image-12.jpeg',
-    '/assets/hero-section-banner/banner-image-13.jpeg',
-
-    // '/assets/hero-section-banner/banner-image-11.jpeg',
-    '/assets/hero-section-banner/banner-image-2.jpg',
-    '/assets/hero-section-banner/banner-image-3.jpg',
-    // '/assets/hero-section-banner/banner-image-4.jpg',
-    // '/assets/hero-section-banner/banner-image-5.jpg',
-
-    '/assets/hero-section-banner/banner-image-8.jpg',
-
-    '/assets/hero-section-banner/banner-image-9.jpg',
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchBanners();
+        const list = (data.banners || [])
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          .map((b) => b.image_url || '')
+          .filter(Boolean);
+        if (!cancelled && list.length > 0) setSlides(list);
+      } catch {
+        // keep default slides on error
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Auto-play carousel
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -41,6 +48,13 @@ const Hero = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  const imageUrl = (src) => {
+    if (!src) return '';
+    if (src.startsWith('http')) return src;
+    if (src.startsWith('/')) return src;
+    return `/${src.replace(/^\//, '')}`;
+  };
+
   return (
     <section className="relative h-[250px] md:h-[110vh] overflow-hidden">
       {/* Carousel Images */}
@@ -53,9 +67,9 @@ const Hero = () => {
             }`}
           >
             <img
-              src={image}
+              src={imageUrl(image)}
               alt={`Banner ${index + 1}`}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
             />
           </div>
         ))}

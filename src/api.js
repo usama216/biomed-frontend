@@ -91,3 +91,88 @@ export async function fetchAdminOrders() {
   if (!res.ok) throw new Error('Failed to load orders');
   return res.json();
 }
+
+// --- Banners (hero carousel) ---
+
+export async function fetchBanners() {
+  const res = await fetch(`${API_BASE}/api/banners`);
+  if (!res.ok) throw new Error('Failed to load banners');
+  return res.json();
+}
+
+export async function fetchAdminBanners() {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/banners`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) throw new Error('Failed to load banners');
+  return res.json();
+}
+
+export async function createBanner(file, sort_order = 0) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  form.append('image', file);
+  form.append('sort_order', String(sort_order));
+  const res = await fetch(`${API_BASE}/api/admin/banners`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to add banner');
+  }
+  return res.json();
+}
+
+export async function updateBanner(id, { file, sort_order }) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  if (file) form.append('image', file);
+  if (sort_order !== undefined) form.append('sort_order', String(sort_order));
+  if (!file && sort_order === undefined) throw new Error('Provide a new image or sort_order');
+  const res = await fetch(`${API_BASE}/api/admin/banners/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to update banner');
+  }
+  return res.json();
+}
+
+export async function deleteBanner(id) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/banners/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to delete banner');
+  }
+  return res.json();
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLoginPage from '../pages/AdminLoginPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
+import AdminBannersPage from '../pages/AdminBannersPage';
 import { isAdminLoggedIn } from '../api';
 
 export default function AdminLayout() {
@@ -13,6 +14,16 @@ export default function AdminLayout() {
         element={
           isAdminLoggedIn() ? (
             <AdminDashboardPage />
+          ) : (
+            <Navigate to="/admin" replace />
+          )
+        }
+      />
+      <Route
+        path="banners"
+        element={
+          isAdminLoggedIn() ? (
+            <AdminBannersPage />
           ) : (
             <Navigate to="/admin" replace />
           )
