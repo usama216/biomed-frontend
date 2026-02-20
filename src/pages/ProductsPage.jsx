@@ -15,9 +15,9 @@ const ProductsPage = ({ addToCart }) => {
 
   const categories = [
     'All Products', 'B Vitamins', 'Beauty', 'Best Selling', 'Blood Sugar Support',
-    'Bones & Joints', "Children's Health", 'Digestive Health', 'Essential Oils',
-    'Fertility Support', 'Fish Oil', 'Glutathione', 'Gummies', 'Hair Care',
-    'Heart Health', 'Herbal Support', 'Immune Support', 'Memory & Brain Support',
+    'Bones & Joints', "Children's Health", 'Digestive Health',
+    'Fertility Support', 'Fish Oil', 'Glutathione', 'Hair Care',
+    'Heart Health','Immune Support', 'Memory & Brain Support',
     "Men's Health", 'Multivitamins', "Women's Health"
   ];
 
@@ -31,7 +31,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 2390,
       image: '/assets/new-products/product-1.jpeg',
       description: 'Magioo Magnesium Glycinate is a dietary supplement tablet containing 1000 mg of Magnesium Glycinate (USP) per serving. Supports sleep, helps nerve and muscle function, promotes bone & heart health, and enhances nutrient absorption.',
-      inStock: true
+      inStock: true,
+      category: 'Best Selling'
     },
     {
       id: 'prod-2',
@@ -42,7 +43,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1120,
       image: '/assets/new-products/product-2.jpeg',
       description: 'Ostical-D Tablets are a bone health supplement manufactured by Biomed Innovation Pharmaceuticals. The product is formulated with Calcium Carbonate, Magnesium, Zinc, Vitamin D3, and Vitamin K, designed to help remove joint pain and support the development of healthy bones & teeth, while also supporting the maintenance of strong bones.',
-      inStock: true
+      inStock: true,
+      category: 'Bones & Joints'
     },
     {
       id: 'prod-3',
@@ -53,7 +55,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 950,
       image: '/assets/new-products/product-3.jpeg',
       description: 'Zincoo ZINC is a high-quality zinc supplement formulated with Zinc Gluconate 50mg per serving. It supports immune function, promotes skin health, and aids in cell growth. The product is manufactured by Biomed, emphasizing natural ingredients for optimal absorption.',
-      inStock: true
+      inStock: true,
+      category: ['Fertility Support', 'Digestive Health', 'Immune Support', "Men's Health"]
     },
     {
       id: 'prod-4',
@@ -64,7 +67,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 4300,
       image: '/assets/new-products/product-4.jpeg',
       description: 'Glutamed L-Glutathione with Vitamin C is a dietary supplement manufactured by Biomed Innovation Pharmaceuticals Pvt Ltd. The product is packaged in a bottle of 30 capsules and is promoted for skin benefits, including skin lightening, detoxification, and anti-aging effects.',
-      inStock: true
+      inStock: true,
+      category: ['Beauty', 'Glutathione']
     },
     {
       id: 'prod-5',
@@ -75,7 +79,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1590,
       image: '/assets/new-products/product-5.jpeg',
       description: 'Bomega Omega-3 500mg is a premium dietary supplement marketed by BioMed Innovation Pharmaceuticals (Pvt) Ltd. Each bottle contains 30 softgel capsules, providing 500mg of high-quality Omega-3 fish oil per capsule. Supports heart health, brain function, and joint support.',
-      inStock: true
+      inStock: true,
+      category: ['Fish Oil', 'Heart Health', 'Memory & Brain Support']
     },
     {
       id: 'prod-6',
@@ -86,7 +91,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1420,
       image: '/assets/new-products/product-6.jpeg',
       description: 'Bio-12 is a dietary supplement in tablet form containing Mecobalamin 2000mcg, a form of Vitamin B12. It supports nerve health, energy metabolism, and red blood cell production. The product is marketed by Biomed Pharmaceuticals and is promoted for nervous system maintenance and increased body energy.',
-      inStock: true
+      inStock: true,
+      category: 'B Vitamins'
     },
     {
       id: 'prod-7',
@@ -97,7 +103,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1990,
       image: '/assets/new-products/product-7.jpeg',
       description: 'Nurose Collagen capsules are a dietary supplement packed with Vitamin C (20 mg), Biotin (2500 mcg), and Collagen (1000 mg) in each dose. The blend works to boost beauty and wellness from the inside out, delivering thicker healthier hair, youthful skin, and stronger nails.',
-      inStock: true
+      inStock: true,
+      category: ['Beauty', 'Hair Care']
     },
     {
       id: 'prod-8',
@@ -108,7 +115,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1400,
       image: '/assets/new-products/product-8.jpeg',
       description: 'Noro tablets are a nutraceutical dietary supplement marketed by Biomed Innovation Pharmaceuticals Pvt Ltd. Each tablet contains Calcium L-5-Methyltetrahydrofolate (490 mcg), Vitamin B6 (1.3 mg), and Vitamin B12 (1 mcg). The product is designed to support cognitive function, healthy red blood cell formation, and boost energy levels.',
-      inStock: true
+      inStock: true,
+      category: 'Blood Sugar Support'
     },
     {
       id: 'prod-9',
@@ -119,7 +127,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1890,
       image: '/assets/new-products/product-9.jpeg',
       description: 'A once‑daily multivitamin tablet formulated for adult men, enriched with Coenzyme Q10, Ginkgo biloba, L‑Carnitine & L‑Arginine. Key benefits include nutritional support for overall health, energy metabolism enhancement, muscle strength assistance, and immunity boost.',
-      inStock: true
+      inStock: true,
+      category: ['Fertility Support', "Men's Health", 'Multivitamins']
     },
     {
       id: 'prod-10',
@@ -130,7 +139,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1890,
       image: '/assets/new-products/product-10.jpeg',
       description: 'A once‑daily multivitamin tablet specially formulated for adult women, enriched with Inositol, Alpha Lipoic Acid & Biotin 2500 mcg. Key benefits include nutritional support for overall health, energy metabolism boost, healthy hair, skin & nails, and immunity enhancement.',
-      inStock: true
+      inStock: true,
+      category: ['Multivitamins', "Women's Health"]
     },
     {
       id: 'prod-11',
@@ -141,7 +151,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 1590,
       image: '/assets/new-products/product-11.jpeg',
       description: 'Biotin + Keratin is a dietary supplement tablet containing Biotin 2500mcg and Hydrolyzed Keratin 250mg. It is designed for adult men and supports hair growth, nail health, skin health, and overall wellness.',
-      inStock: true
+      inStock: true,
+      category: ['Beauty', 'Hair Care']
     },
     {
       id: 'prod-12',
@@ -152,7 +163,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 2990,
       image: '/assets/new-products/product-12.jpeg',
       description: 'X‑NUR herbal supplement tablets by Biomed Innovation Pharmaceuticals. Benefits include boosting testosterone, enhancing muscle strength & performance, supporting mental health & stamina, and increasing energy levels.',
-      inStock: true
+      inStock: true,
+      category: ['Fertility Support', "Men's Health"]
     },
     {
       id: 'prod-13',
@@ -163,7 +175,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 780,
       image: '/assets/new-products/product-13.jpeg',
       description: 'Ostical-D Syrup is a bone health supplement by Biomed Innovation Pharmaceuticals. It contains Calcium Carbonate, Magnesium, Zinc, Vitamin D3, and Vitamin K. The syrup is designed to help remove joint pain and support the development of healthy bones & teeth, while also supporting the maintenance of strong bones.',
-      inStock: true
+      inStock: true,
+      category: "Children's Health"
     },
     {
       id: 'prod-14',
@@ -174,7 +187,8 @@ const ProductsPage = ({ addToCart }) => {
       discountedPrice: 435,
       image: '/assets/new-products/product-14.jpeg',
       description: 'DeAll is a premium softgel supplement that combines Vitamin D3 (200,000 IU) with Vitamin K2, formulated by BioMed Innovation Pharmaceuticals Pvt Ltd. This powerful blend supports multiple aspects of health, including immune function, energy & vitality, muscle strength, and bone health.',
-      inStock: true
+      inStock: true,
+      category: 'Bones & Joints'
     }
   ];
 
@@ -184,6 +198,37 @@ const ProductsPage = ({ addToCart }) => {
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
   };
+
+  // Helper function to normalize category name for comparison
+  const normalizeCategoryName = (catName) => {
+    return catName.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-');
+  };
+
+  // Filter products based on selected category
+  const filteredProducts = React.useMemo(() => {
+    if (!category || category === 'all-products') {
+      return products;
+    }
+    
+    // Find the matching category from the categories array
+    const selectedCategory = categories.find(cat => 
+      normalizeCategoryName(cat) === category
+    );
+    
+    if (!selectedCategory) {
+      return products; // Return all if category not found
+    }
+    
+    // Filter products that belong to the selected category
+    // Support both single category (string) and multiple categories (array)
+    return products.filter(product => {
+      if (!product.category) return false;
+      if (Array.isArray(product.category)) {
+        return product.category.includes(selectedCategory);
+      }
+      return product.category === selectedCategory;
+    });
+  }, [category, products]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -207,19 +252,24 @@ const ProductsPage = ({ addToCart }) => {
               <div className="mb-6">
                 <h3 className="font-bold text-lg mb-4">CATEGORIES</h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {categories.map((cat, idx) => (
-                    <a
-                      key={idx}
-                      href={`/products/${cat.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-')}`}
-                      className={`block py-2 px-3 rounded hover:bg-biomed-teal/10 transition-colors ${
-                        category === cat.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-') 
-                          ? 'bg-biomed-teal/20 font-semibold' 
-                          : ''
-                      }`}
-                    >
-                      {cat}
-                    </a>
-                  ))}
+                  {categories.map((cat, idx) => {
+                    const categorySlug = normalizeCategoryName(cat);
+                    const isAllProducts = cat === 'All Products';
+                    const isActive = !category ? isAllProducts : category === categorySlug;
+                    return (
+                      <Link
+                        key={idx}
+                        to={isAllProducts ? '/products' : `/products/${categorySlug}`}
+                        className={`block py-2 px-3 rounded hover:bg-biomed-teal/10 transition-colors ${
+                          isActive
+                            ? 'bg-biomed-teal/20 font-semibold' 
+                            : ''
+                        }`}
+                      >
+                        {cat}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -314,7 +364,12 @@ const ProductsPage = ({ addToCart }) => {
 
             {/* Products Grid */}
             <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid-cols-1 gap-4'}`}>
-              {products.map((product) => (
+              {filteredProducts.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500 text-lg">No products found in this category.</p>
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
                 <Link 
                   key={product.id} 
                   to={`/product/${product.id}`}
@@ -328,6 +383,11 @@ const ProductsPage = ({ addToCart }) => {
                         className="w-full h-full object-contain"
                       />
                     </div>
+                    {product.inStock && (
+                      <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                        -15%
+                      </div>
+                    )}
                     {!product.inStock && (
                       <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
                         Sold Out
@@ -354,7 +414,6 @@ const ProductsPage = ({ addToCart }) => {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
 
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-gray-400 line-through text-sm">Rs. {product.originalPrice}</span>
                       <span className="text-xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
                     </div>
 
@@ -379,7 +438,8 @@ const ProductsPage = ({ addToCart }) => {
                     </div>
                   </div>
                 </Link>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

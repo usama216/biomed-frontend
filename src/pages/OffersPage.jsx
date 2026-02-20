@@ -230,7 +230,7 @@ const OffersPage = ({ addToCart }) => {
       {/* Hero Section */}
       <section className="relative h-[400px] md:h-[500px] overflow-hidden">
         <img 
-          src="/assets/offers-hero-section-image.webp" 
+          src="/assets/offers-hero-section-image.png" 
           alt="Offers & Discounts"
           className="w-full h-full object-cover"
         />
@@ -402,7 +402,7 @@ const OffersPage = ({ addToCart }) => {
                       />
                       {/* Badges */}
                       <div className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        Sale
+                        -15%
                       </div>
                       {product.isFree && (
                         <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
@@ -430,9 +430,6 @@ const OffersPage = ({ addToCart }) => {
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-2xl font-bold text-biomed-navy">
                           Rs.{product.discountedPrice.toLocaleString()}
-                        </span>
-                        <span className="text-sm text-gray-400 line-through">
-                          Rs.{product.originalPrice.toLocaleString()}
                         </span>
                       </div>
 

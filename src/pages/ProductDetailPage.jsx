@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, Plus, Minus, ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 const ProductDetailPage = ({ addToCart }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedSections, setExpandedSections] = useState({
@@ -623,12 +624,17 @@ const ProductDetailPage = ({ addToCart }) => {
           <div>
             {/* Main Image/Video - Sticky */}
             <div className="sticky top-4">
-              <div className="bg-gray-50 rounded-lg p-8 mb-3 flex items-center justify-center h-[500px]">
+              <div className="bg-gray-50 rounded-lg p-8 mb-3 flex items-center justify-center h-[500px] relative">
                 <img 
                   src={product.images && product.images[selectedImage] ? product.images[selectedImage] : '/assets/new-products/product-1.jpeg'} 
                   alt={product.name}
                   className="max-h-full max-w-full object-contain"
                 />
+                {product.inStock && (
+                  <div className="absolute top-3 left-3 bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded">
+                    -15%
+                  </div>
+                )}
               </div>
               
               {/* Thumbnail Images - Show if more than 1 image */}
@@ -692,12 +698,7 @@ const ProductDetailPage = ({ addToCart }) => {
 
             {/* Price */}
             <div className="mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
-                {product.originalPrice > product.discountedPrice && (
-                  <span className="text-base text-gray-400 line-through">Rs. {product.originalPrice}</span>
-                )}
-              </div>
+              <span className="text-2xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
             </div>
 
             {/* Helps Section */}
@@ -767,7 +768,13 @@ const ProductDetailPage = ({ addToCart }) => {
                 {product.inStock ? 'ADD TO CART' : 'OUT OF STOCK'}
               </button>
               <button 
+                type="button"
                 disabled={!product.inStock}
+                onClick={() => {
+                  if (!product.inStock) return;
+                  addToCart({ ...product, quantity, image: product.images?.[0] || '/assets/products/main-product.jpeg' }, false);
+                  navigate('/checkout');
+                }}
                 className={`flex-1 py-2.5 rounded-lg font-semibold text-sm ${
                   product.inStock
                     ? 'bg-white border-2 border-gray-800 hover:bg-gray-50 text-gray-800'
@@ -900,16 +907,13 @@ const ProductDetailPage = ({ addToCart }) => {
                   <div className="h-40 flex items-center justify-center mb-3 relative">
                     <img src={prod.image} alt={prod.name} className="max-h-full object-contain" />
                     {prod.originalPrice && prod.discountedPrice && prod.originalPrice > prod.discountedPrice && (
-                      <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded">
-                        {Math.round(((prod.originalPrice - prod.discountedPrice) / prod.originalPrice) * 100)}% OFF
+                      <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded font-bold">
+                        -15%
                       </span>
                     )}
                   </div>
                   <h3 className="text-sm font-semibold mb-2 line-clamp-2">{prod.name}</h3>
                   <div className="flex items-center gap-1.5 mb-2">
-                    {prod.originalPrice && (
-                      <span className="text-gray-400 line-through text-xs">Rs. {prod.originalPrice}</span>
-                    )}
                     <span className="text-base font-bold text-biomed-teal">Rs. {prod.discountedPrice}</span>
                   </div>
                   <button 

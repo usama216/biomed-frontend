@@ -229,7 +229,7 @@ const LatestOffers = ({ addToCart }) => {
                     className="w-full h-full object-contain hover:scale-105 transition-transform"
                   />
                   <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                    SALE
+                    -15%
                   </div>
                 </div>
                 <div className="p-4">

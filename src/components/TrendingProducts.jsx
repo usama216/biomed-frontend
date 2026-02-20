@@ -235,12 +235,15 @@ const TrendingProducts = ({ addToCart }) => {
                 to={`/product/${product.id}`}
                 className="w-[280px] min-w-[280px] max-w-[280px] bg-white border rounded-lg p-4 hover:shadow-lg transition-shadow flex-shrink-0 block cursor-pointer"
               >
-                <div className="h-48 rounded-lg mb-4 flex items-center justify-center bg-gray-50 overflow-hidden">
+                <div className="h-48 rounded-lg mb-4 flex items-center justify-center bg-gray-50 overflow-hidden relative">
                   <img 
                     src={product.image} 
                     alt={product.name} 
                     className="w-full h-full object-contain hover:scale-105 transition-transform"
                   />
+                  <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                    -15%
+                  </div>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 h-12 line-clamp-2">{product.name}</h3>
                 <div className="flex items-center gap-2 mb-2">
@@ -256,7 +259,6 @@ const TrendingProducts = ({ addToCart }) => {
                   <span className="text-sm text-gray-600">({product.reviews})</span>
                 </div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-gray-400 line-through text-sm">Rs. {product.originalPrice}</span>
                   <span className="text-xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
                 </div>
                 <button

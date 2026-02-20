@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, CreditCard, Loader2, ArrowLeft, User, Mail, Phone, MapPin, FileText, Banknote } from 'lucide-react';
-import { createCheckoutSession, placeCodOrder } from '../api';
+import { ShoppingBag, Loader2, ArrowLeft, User, Mail, Phone, MapPin, FileText, Banknote } from 'lucide-react';
+import { placeCodOrder } from '../api';
 
 const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState('stripe'); // 'stripe' | 'cod'
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -42,40 +41,6 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
       postalCode: (postalCode || '').trim(),
       deliveryNotes: (deliveryNotes || '').trim(),
     };
-  };
-
-  const handlePayWithStripe = async (e) => {
-    e.preventDefault();
-    if (cartItems.length === 0) {
-      setError('Your cart is empty.');
-      return;
-    }
-    const err = validateForm();
-    if (err) {
-      setError(err);
-      return;
-    }
-    setError('');
-    setLoading(true);
-    try {
-      const successUrl = `${window.location.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
-      const cancelUrl = `${window.location.origin}/checkout`;
-      const payload = cartItems.map((item) => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity || 1,
-        discountedPrice: item.discountedPrice ?? item.price,
-        price: item.discountedPrice ?? item.price,
-        image: item.image || (item.images && item.images[0]),
-      }));
-      const { url } = await createCheckoutSession(payload, successUrl, cancelUrl, getCustomer());
-      if (url) window.location.href = url;
-      else setError('Could not start checkout.');
-    } catch (err) {
-      setError(err.message || 'Checkout failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handlePlaceCodOrder = async (e) => {
@@ -137,9 +102,9 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
         </Link>
 
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-        <p className="text-gray-600 mb-8">Enter your details and complete payment securely with Stripe.</p>
+        <p className="text-gray-600 mb-8">Enter your details and place your order. Pay when your order is delivered (Cash on Delivery).</p>
 
-        <form onSubmit={paymentMethod === 'cod' ? handlePlaceCodOrder : handlePayWithStripe}>
+        <form onSubmit={handlePlaceCodOrder}>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Delivery & contact info */}
             <div className="bg-white rounded-xl shadow-sm border p-6 order-2 md:order-1 space-y-4">
@@ -297,39 +262,11 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
 
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <CreditCard size={22} />
-                  Payment method
+                  <Banknote size={22} />
+                  Cash on Delivery
                 </h2>
-                <div className="flex gap-3 mb-4">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('stripe')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 font-medium transition-colors ${
-                      paymentMethod === 'stripe'
-                        ? 'border-biomed-teal bg-biomed-teal/10 text-biomed-navy'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    <CreditCard size={20} />
-                    Pay with Card
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('cod')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 font-medium transition-colors ${
-                      paymentMethod === 'cod'
-                        ? 'border-biomed-teal bg-biomed-teal/10 text-biomed-navy'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    <Banknote size={20} />
-                    Cash on Delivery
-                  </button>
-                </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  {paymentMethod === 'stripe'
-                    ? 'You will be redirected to Stripe to pay securely with your card.'
-                    : 'Pay when your order is delivered. No online payment required.'}
+                  Pay when your order is delivered. No online payment required.
                 </p>
                 {error && (
                   <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg mb-4">{error}</p>
@@ -342,17 +279,12 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                   {loading ? (
                     <>
                       <Loader2 size={20} className="animate-spin" />
-                      {paymentMethod === 'cod' ? 'Placing order…' : 'Redirecting to payment…'}
-                    </>
-                  ) : paymentMethod === 'cod' ? (
-                    <>
-                      <Banknote size={20} />
-                      Place order (Cash on Delivery)
+                      Placing order…
                     </>
                   ) : (
                     <>
-                      <CreditCard size={20} />
-                      Pay with Stripe
+                      <Banknote size={20} />
+                      Place order (Cash on Delivery)
                     </>
                   )}
                 </button>

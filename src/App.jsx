@@ -20,21 +20,21 @@ function AppContent() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
 
-  const addToCart = (product) => {
+  const addToCart = (product, openSidebar = true) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
-      
+      const qty = product.quantity ?? 1;
       if (existingItem) {
         return prevItems.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + qty }
             : item
         );
       } else {
-        return [...prevItems, { ...product, quantity: 1 }];
+        return [...prevItems, { ...product, quantity: qty }];
       }
     });
-    setIsCartOpen(true);
+    if (openSidebar) setIsCartOpen(true);
   };
 
   const updateQuantity = (id, quantity) => {

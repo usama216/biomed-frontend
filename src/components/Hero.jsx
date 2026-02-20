@@ -6,6 +6,7 @@ const Hero = () => {
   
   const slides = [
     '/assets/hero-section-banner/banner-image-14.jpeg',
+    '/assets/hero-section-banner/banner-image-15.jpeg',
 
     // '/assets/hero-section-banner/banner-image-10.jpeg',
     '/assets/hero-section-banner/banner-image-6.jpg',

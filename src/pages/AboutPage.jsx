@@ -41,11 +41,7 @@ const AboutPage = () => {
       title: 'Quality Control',
       description: 'Raw materials are accepted only if they meet qualification conditions for quality & safety.'
     },
-    {
-      icon: Factory,
-      title: 'Manufacturing',
-      description: 'We manufacture all products according to the cGMP and ISO standards.'
-    },
+
     {
       icon: PackageCheck,
       title: 'Final Testing',
@@ -110,14 +106,11 @@ const AboutPage = () => {
       <section className="py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-14">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-biomed-teal/10 px-6 py-2 rounded-full mb-4">
-              <Factory className="text-biomed-teal" size={20} />
-              <span className="text-biomed-teal font-semibold">Manufacturing Excellence</span>
-            </div>
+           
             <h2 className="text-4xl md:text-5xl font-bold text-biomed-navy mb-4">
-              Region's Largest Pharmaceutical
+            Providing you the best Innovative Pharmaceutical 
               <br />
-              <span className="text-biomed-teal">Manufacturing Facility</span>
+              <span className="text-biomed-teal">& Nutraceuticals Products in Pakistan</span>
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -142,8 +135,7 @@ const AboutPage = () => {
             </div>
             <div className="space-y-6">
               <p className="text-lg text-gray-700 leading-relaxed">
-                With decades of experience and expertise, BIOMED has invested significantly in state-of-the-art manufacturing equipment and warehousing facilities.
-              </p>
+              Delivering Innovative Pharmaceutical & Nutraceutical Solutions for a Healthier Pakistan.   </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all">
                   <div className="w-12 h-12 bg-biomed-teal/10 rounded-lg flex items-center justify-center flex-shrink-0">
