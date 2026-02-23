@@ -17,7 +17,7 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.discountedPrice || item.price) * (item.quantity || 1), 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.discountedPrice ?? item.price ?? item.originalPrice ?? 0) * (item.quantity || 1), 0);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -61,8 +61,8 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
         id: item.id,
         name: item.name,
         quantity: item.quantity || 1,
-        discountedPrice: item.discountedPrice ?? item.price,
-        price: item.discountedPrice ?? item.price,
+        discountedPrice: item.discountedPrice ?? item.price ?? item.originalPrice,
+        price: item.discountedPrice ?? item.price ?? item.originalPrice,
       }));
       const { order } = await placeCodOrder(payload, getCustomer());
       if (typeof onOrderSuccess === 'function') onOrderSuccess();
@@ -246,7 +246,7 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                         <p className="font-medium text-gray-900 line-clamp-2">{item.name}</p>
                         <p className="text-sm text-gray-500">Qty: {item.quantity || 1}</p>
                         <p className="text-biomed-teal font-semibold">
-                          Rs. {(item.discountedPrice ?? item.price) * (item.quantity || 1)}
+                          Rs. {(item.discountedPrice ?? item.price ?? item.originalPrice ?? 0) * (item.quantity || 1)}
                         </p>
                       </div>
                     </div>

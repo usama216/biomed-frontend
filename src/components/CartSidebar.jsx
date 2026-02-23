@@ -3,7 +3,7 @@ import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CartSidebar = ({ isOpen, onClose, cartItems, updateQuantity, removeItem }) => {
-  const total = cartItems.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
+  const total = cartItems.reduce((sum, item) => sum + ((item.discountedPrice ?? item.originalPrice ?? 0) * (item.quantity || 1)), 0);
 
   return (
     <>
@@ -52,7 +52,7 @@ const CartSidebar = ({ isOpen, onClose, cartItems, updateQuantity, removeItem })
                     />
                     <div className="flex-1">
                       <h3 className="font-semibold text-sm line-clamp-2">{item.name}</h3>
-                      <p className="text-biomed-teal font-bold">Rs. {item.discountedPrice}</p>
+                      <p className="text-biomed-teal font-bold">Rs. {item.discountedPrice ?? item.originalPrice ?? 0}</p>
                       
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2 mt-2">

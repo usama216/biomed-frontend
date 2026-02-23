@@ -62,6 +62,7 @@ function AppContent() {
           <Route path="/checkout" element={<CheckoutPage cartItems={cartItems} onOrderSuccess={() => setCartItems([])} />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage onOrderSuccess={() => setCartItems([])} />} />
           <Route path="/offers" element={<OffersPage addToCart={addToCart} />} />
+          <Route path="/offers/:category" element={<OffersPage addToCart={addToCart} />} />
           <Route path="/health-points" element={<HealthPointsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />

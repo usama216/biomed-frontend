@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, Plus, Minus, ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getDiscountedPrice } from '../utils/pricing';
 
 const ProductDetailPage = ({ addToCart }) => {
   const { id } = useParams();
@@ -697,8 +698,9 @@ const ProductDetailPage = ({ addToCart }) => {
             </div>
 
             {/* Price */}
-            <div className="mb-4">
-              <span className="text-2xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
+            <div className="mb-4 flex items-center gap-3">
+              <span className="text-gray-500 line-through text-lg">Rs. {product.originalPrice}</span>
+              <span className="text-2xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice)}</span>
             </div>
 
             {/* Helps Section */}
@@ -750,13 +752,13 @@ const ProductDetailPage = ({ addToCart }) => {
 
             {/* Subtotal */}
             <div className="mb-4">
-              <p className="text-base font-semibold">Subtotal: <span className="text-biomed-teal">Rs. {product.discountedPrice * quantity}</span></p>
+              <p className="text-base font-semibold">Subtotal: <span className="text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice) * quantity}</span></p>
             </div>
 
             {/* Action Buttons */}
             <div className="flex gap-3 mb-4">
               <button 
-                onClick={() => addToCart({...product, quantity, image: product.images && product.images[0] ? product.images[0] : '/assets/products/main-product.jpeg'})}
+                onClick={() => addToCart({...product, quantity, discountedPrice: getDiscountedPrice(product.originalPrice), image: product.images && product.images[0] ? product.images[0] : '/assets/products/main-product.jpeg'})}
                 disabled={!product.inStock}
                 className={`flex-1 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
                   product.inStock
@@ -772,7 +774,7 @@ const ProductDetailPage = ({ addToCart }) => {
                 disabled={!product.inStock}
                 onClick={() => {
                   if (!product.inStock) return;
-                  addToCart({ ...product, quantity, image: product.images?.[0] || '/assets/products/main-product.jpeg' }, false);
+                  addToCart({ ...product, quantity, discountedPrice: getDiscountedPrice(product.originalPrice), image: product.images?.[0] || '/assets/products/main-product.jpeg' }, false);
                   navigate('/checkout');
                 }}
                 className={`flex-1 py-2.5 rounded-lg font-semibold text-sm ${

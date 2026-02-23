@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getDiscountedPrice } from '../utils/pricing';
 
 const TrendingProducts = ({ addToCart }) => {
   const [activeTab, setActiveTab] = useState('bestselling');
@@ -259,12 +260,13 @@ const TrendingProducts = ({ addToCart }) => {
                   <span className="text-sm text-gray-600">({product.reviews})</span>
                 </div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
+                  <span className="text-gray-500 line-through text-sm">Rs. {product.originalPrice}</span>
+                  <span className="text-xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice)}</span>
                 </div>
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    handleAddToCart(product);
+                    handleAddToCart({ ...product, discountedPrice: getDiscountedPrice(product.originalPrice) });
                   }}
                   className="w-full bg-biomed-navy hover:bg-biomed-navy/90 text-white py-2 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                 >

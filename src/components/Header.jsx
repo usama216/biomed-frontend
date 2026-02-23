@@ -51,15 +51,15 @@ const Header = ({ cartCount = 0, onCartClick }) => {
   return (
     <header className="w-full sticky top-0 z-50 bg-white shadow-md">
       {/* Top Banner */}
-      <div className="bg-biomed-teal/10 py-2 overflow-hidden">
+      <div className="bg-biomed-teal/10 py-1 overflow-hidden">
         <div className="animate-marquee whitespace-nowrap">
-          <span className="text-sm text-biomed-navy mx-4">
+          <span className="text-xs text-biomed-navy mx-3">
             Your Health Care Partner - Free Home Delivery On Orders Above Rs. 2000
           </span>
-          <span className="text-sm text-biomed-navy mx-4">
+          <span className="text-xs text-biomed-navy mx-3">
             Your Health Care Partner - Free Home Delivery On Orders Above Rs. 2000
           </span>
-          <span className="text-sm text-biomed-navy mx-4">
+          <span className="text-xs text-biomed-navy mx-3">
             Your Health Care Partner - Free Home Delivery On Orders Above Rs. 2000
           </span>
         </div>
@@ -67,7 +67,7 @@ const Header = ({ cartCount = 0, onCartClick }) => {
 
       {/* Main Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between gap-4">
             {/* Mobile Menu Button */}
             <button 
@@ -79,11 +79,11 @@ const Header = ({ cartCount = 0, onCartClick }) => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2">
               <img 
                 src="/assets/Biomed.png" 
                 alt="BIOMED Logo" 
-                className="h-20 sm:h-20 md:h-20 lg:h-20 w-auto object-contain"
+                className="h-12 sm:h-14 md:h-14 lg:h-14 w-auto object-contain"
               />
             </Link>
 
@@ -93,9 +93,9 @@ const Header = ({ cartCount = 0, onCartClick }) => {
                 <input
                   type="text"
                   placeholder="Search the store"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-biomed-teal"
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-biomed-teal"
                 />
-                <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
+                <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               </div>
             </div>
 
@@ -116,7 +116,7 @@ const Header = ({ cartCount = 0, onCartClick }) => {
                 className="relative p-2 hover:text-biomed-teal transition-colors"
                 aria-label="Shopping cart"
               >
-                <ShoppingCart size={20} sm:size={24} />
+                <ShoppingCart size={20} />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {cartCount}
@@ -125,8 +125,8 @@ const Header = ({ cartCount = 0, onCartClick }) => {
               </button>
 
               {/* Account */}
-              <button className="hidden sm:flex items-center gap-2 hover:text-biomed-teal">
-                <User size={24} />
+              <button className="hidden sm:flex items-center gap-1.5 hover:text-biomed-teal">
+                <User size={20} />
                 <span className="hidden md:inline text-sm">My Account</span>
               </button>
               <button className="sm:hidden p-2 hover:text-biomed-teal">
@@ -137,15 +137,15 @@ const Header = ({ cartCount = 0, onCartClick }) => {
 
           {/* Mobile Search Bar */}
           {isMobileSearchOpen && (
-            <div className="lg:hidden mt-4 animate-fadeIn">
+            <div className="lg:hidden mt-2 animate-fadeIn">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search the store"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-biomed-teal transition-all"
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-biomed-teal transition-all"
                   autoFocus
                 />
-                <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
+                <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               </div>
             </div>
           )}
@@ -154,7 +154,7 @@ const Header = ({ cartCount = 0, onCartClick }) => {
         {/* Desktop Navigation Menu */}
         <nav className="hidden lg:block bg-white border-t relative">
           <div className="max-w-7xl mx-auto px-4">
-            <ul className="flex items-center gap-8 py-3 text-sm">
+            <ul className="flex items-center gap-6 py-2 text-sm">
               <li><Link to="/" className="hover:text-biomed-teal font-medium">Home</Link></li>
               <li><Link to="/products" className="hover:text-biomed-teal font-medium">Products</Link></li>
               <li><Link to="/offers" className="hover:text-biomed-teal">Offers</Link></li>

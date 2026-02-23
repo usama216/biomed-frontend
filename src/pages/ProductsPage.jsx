@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Star, ShoppingCart, Grid, List } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
+import { getDiscountedPrice } from '../utils/pricing';
 
-const ProductsPage = ({ addToCart }) => {
+const ProductsPage = ({ addToCart, variant }) => {
+  const isOffers = variant === 'offers';
   const { category } = useParams();
   const [priceRange, setPriceRange] = useState([0, 4500]);
   const [viewMode, setViewMode] = useState('grid');
@@ -193,10 +195,17 @@ const ProductsPage = ({ addToCart }) => {
   ];
 
   const getCategoryTitle = () => {
+    if (isOffers && !category) return 'Offers & Discounts';
+    if (isOffers && category) return category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     if (!category) return 'All Products';
     return category.split('-').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
+  };
+
+  const getHeroSubtitle = () => {
+    if (isOffers) return "Looking for an amazing discount offer? We bring to you some of the most exciting offers & discounts on your favorite products. Grab your favorite deal today and kick-start your journey of fitness & wellness.";
+    return "Every day is a new challenge & to keep up you need your daily dose of energy. BIOMED's health care products help you keep energetic, active & ready for any stage of life.";
   };
 
   // Helper function to normalize category name for comparison
@@ -204,23 +213,16 @@ const ProductsPage = ({ addToCart }) => {
     return catName.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-');
   };
 
-  // Filter products based on selected category
+  // Filter products based on selected category (offers page: all when no category, else by category)
   const filteredProducts = React.useMemo(() => {
-    if (!category || category === 'all-products') {
-      return products;
-    }
+    if (!category || category === 'all-products') return products;
     
-    // Find the matching category from the categories array
     const selectedCategory = categories.find(cat => 
       normalizeCategoryName(cat) === category
     );
     
-    if (!selectedCategory) {
-      return products; // Return all if category not found
-    }
+    if (!selectedCategory) return products;
     
-    // Filter products that belong to the selected category
-    // Support both single category (string) and multiple categories (array)
     return products.filter(product => {
       if (!product.category) return false;
       if (Array.isArray(product.category)) {
@@ -232,16 +234,37 @@ const ProductsPage = ({ addToCart }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-blue-100 to-teal-100 py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">{getCategoryTitle()}</h1>
-          <p className="text-xl text-gray-700">
-            Every day is a new challenge & to keep up you need your daily dose of energy. 
-            BIOMED's health care products help you keep energetic, active & ready for any stage of life.
-          </p>
+      {isOffers ? (
+        <>
+          {/* Offers Hero Image */}
+          <section className="relative h-[600px] md:h-[800px] overflow-hidden">
+            <img
+              src="/assets/hero-section-banner/banner-image-15.jpeg"
+              alt="Offers & Discounts"
+              className="w-full h-full object-cover"
+            />
+          </section>
+          {/* Offers Description */}
+          <section className="py-8 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4">
+              <h1 className="text-3xl font-bold text-biomed-navy mb-4">{getCategoryTitle()}</h1>
+              <p className="text-gray-700 text-lg leading-relaxed max-w-4xl">
+                {getHeroSubtitle()}
+              </p>
+            </div>
+          </section>
+        </>
+      ) : (
+        /* Products Hero Banner */
+        <div className="bg-gradient-to-r from-blue-100 to-teal-100 py-16">
+          <div className="max-w-7xl mx-auto px-4">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">{getCategoryTitle()}</h1>
+            <p className="text-xl text-gray-700">
+              {getHeroSubtitle()}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-4 gap-8">
@@ -259,7 +282,7 @@ const ProductsPage = ({ addToCart }) => {
                     return (
                       <Link
                         key={idx}
-                        to={isAllProducts ? '/products' : `/products/${categorySlug}`}
+                        to={isAllProducts ? (isOffers ? '/offers' : '/products') : (isOffers ? `/offers/${categorySlug}` : `/products/${categorySlug}`)}
                         className={`block py-2 px-3 rounded hover:bg-biomed-teal/10 transition-colors ${
                           isActive
                             ? 'bg-biomed-teal/20 font-semibold' 
@@ -414,7 +437,8 @@ const ProductsPage = ({ addToCart }) => {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
 
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xl font-bold text-biomed-teal">Rs. {product.discountedPrice}</span>
+                      <span className="text-gray-500 line-through text-sm">Rs. {product.originalPrice}</span>
+                      <span className="text-xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice)}</span>
                     </div>
 
                     <div className="flex gap-2">
@@ -424,7 +448,7 @@ const ProductsPage = ({ addToCart }) => {
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          addToCart(product);
+                          addToCart({ ...product, discountedPrice: getDiscountedPrice(product.originalPrice) });
                         }}
                         disabled={!product.inStock}
                         className={`p-2 rounded ${

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getDiscountedPrice } from '../utils/pricing';
 
 const LatestOffers = ({ addToCart }) => {
   const scrollContainerRef = useRef(null);
@@ -234,11 +235,14 @@ const LatestOffers = ({ addToCart }) => {
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-gray-900 mb-2 h-12 line-clamp-2">{offer.name}</h3>
-                  <p className="text-2xl font-bold text-biomed-teal mb-4">Rs. {offer.discountedPrice}</p>
+                  <p className="mb-4 flex items-center gap-2">
+                    <span className="text-gray-500 line-through">Rs. {offer.originalPrice}</span>
+                    <span className="text-2xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(offer.originalPrice)}</span>
+                  </p>
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
-                      addToCart(offer);
+                      addToCart({ ...offer, discountedPrice: getDiscountedPrice(offer.originalPrice) });
                     }}
                     className="w-full bg-biomed-navy hover:bg-biomed-navy/90 text-white py-2 rounded-lg font-semibold transition-colors"
                   >
