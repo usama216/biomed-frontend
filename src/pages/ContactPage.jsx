@@ -153,7 +153,7 @@ const ContactPage = () => {
               <div className="space-y-3 text-sm text-gray-700">
                 <div className="flex items-start gap-2">
                   <MapPin size={18} className="text-biomed-teal flex-shrink-0 mt-0.5" />
-                  <p>Khayaban-e-Quaid, Multan Road Lahore</p>
+                  <p>13 A/C Muhafiz town Phase 1 Multan Road Lahore</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <Phone size={18} className="text-biomed-teal flex-shrink-0 mt-0.5" />
@@ -178,7 +178,7 @@ const ContactPage = () => {
               <div className="space-y-3 text-sm text-gray-700">
                 <div className="flex items-start gap-2">
                   <MapPin size={18} className="text-biomed-teal flex-shrink-0 mt-0.5" />
-                  <p>Khayaban-e-Quaid, Multan Road Lahore</p>
+                  <p>13 A/C Muhafiz town Phase 1 Multan Road Lahore</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <Phone size={18} className="text-biomed-teal flex-shrink-0 mt-0.5" />
@@ -201,7 +201,7 @@ const ContactPage = () => {
       </section>
 
       {/* International Regional Offices */}
-      {/* <section className="py-16 bg-white">
+              {/* <section className="py-16 bg-white">
         <div className="container mx-auto px-4 md:px-8 lg:px-14">
           <h2 className="text-4xl font-bold text-center text-biomed-navy mb-12">INTERNATIONAL REGIONAL OFFICES</h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -225,7 +225,7 @@ const ContactPage = () => {
                 <MapPin size={20} className="text-biomed-teal flex-shrink-0 mt-1" />
                 <div>
                   <p className="font-semibold">BIOMED Innovation Pharmaceuticals (Pvt.) Ltd</p>
-                  <p>4-B Innovation City, Lahore</p>
+                  <p>13 A/C Muhafiz town Phase 1 Multan Road Lahore</p>
                   <p>Pakistan</p>
                 </div>
               </div>

@@ -176,3 +176,131 @@ export async function deleteBanner(id) {
   }
   return res.json();
 }
+
+// --- Blogs (public) ---
+
+export async function fetchBlogs() {
+  const res = await fetch(`${API_BASE}/api/blogs`);
+  if (!res.ok) throw new Error('Failed to load blogs');
+  return res.json();
+}
+
+export async function fetchBlogByIdOrSlug(idOrSlug) {
+  const res = await fetch(`${API_BASE}/api/blogs/${encodeURIComponent(idOrSlug)}`);
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('Blog not found');
+    throw new Error('Failed to load blog');
+  }
+  return res.json();
+}
+
+// --- Admin Blogs ---
+
+/** Upload image for blog content (inline). Returns { url }. */
+export async function uploadBlogContentImage(file) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  form.append('image', file);
+  const res = await fetch(`${API_BASE}/api/admin/blogs/upload-image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to upload image');
+  }
+  const data = await res.json();
+  return data.url;
+}
+
+export async function fetchAdminBlogs() {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/blogs`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) throw new Error('Failed to load blogs');
+  return res.json();
+}
+
+export async function createBlog({ title, excerpt, content, category, read_time_minutes, published, cover_image }) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  form.append('title', title);
+  if (excerpt != null) form.append('excerpt', excerpt);
+  if (content != null) form.append('content', content);
+  if (category != null) form.append('category', category);
+  if (read_time_minutes != null) form.append('read_time_minutes', String(read_time_minutes));
+  form.append('published', published ? 'true' : 'false');
+  if (cover_image) form.append('cover_image', cover_image);
+  const res = await fetch(`${API_BASE}/api/admin/blogs`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to add blog');
+  }
+  return res.json();
+}
+
+export async function updateBlog(id, { title, excerpt, content, category, read_time_minutes, published, cover_image }) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  if (title !== undefined) form.append('title', title);
+  if (excerpt !== undefined) form.append('excerpt', excerpt);
+  if (content !== undefined) form.append('content', content);
+  if (category !== undefined) form.append('category', category);
+  if (read_time_minutes !== undefined) form.append('read_time_minutes', String(read_time_minutes));
+  if (published !== undefined) form.append('published', published ? 'true' : 'false');
+  if (cover_image) form.append('cover_image', cover_image);
+  const res = await fetch(`${API_BASE}/api/admin/blogs/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to update blog');
+  }
+  return res.json();
+}
+
+export async function deleteBlog(id) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/blogs/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to delete blog');
+  }
+  return res.json();
+}

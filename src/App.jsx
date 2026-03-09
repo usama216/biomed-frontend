@@ -12,6 +12,8 @@ import HealthPointsPage from './pages/HealthPointsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import OffersPage from './pages/OffersPage';
+import BlogsPage from './pages/BlogsPage';
+import BlogDetailPage from './pages/BlogDetailPage';
 import AdminLayout from './components/AdminLayout';
 
 function AppContent() {
@@ -64,6 +66,8 @@ function AppContent() {
           <Route path="/offers" element={<OffersPage addToCart={addToCart} />} />
           <Route path="/offers/:category" element={<OffersPage addToCart={addToCart} />} />
           <Route path="/health-points" element={<HealthPointsPage />} />
+          <Route path="/blogs" element={<BlogsPage />} />
+          <Route path="/blogs/:idOrSlug" element={<BlogDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/admin/*" element={<AdminLayout />} />

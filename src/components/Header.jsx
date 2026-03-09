@@ -158,9 +158,7 @@ const Header = ({ cartCount = 0, onCartClick }) => {
               <li><Link to="/" className="hover:text-biomed-teal font-medium">Home</Link></li>
               <li><Link to="/products" className="hover:text-biomed-teal font-medium">Products</Link></li>
               <li><Link to="/offers" className="hover:text-biomed-teal">Offers</Link></li>
-              {/* <li><Link to="/health-points" className="hover:text-biomed-teal">Health Points</Link></li> */}
-              {/* <li><a href="#" className="hover:text-biomed-teal">International</a></li> */}
-              {/* <li><a href="#" className="hover:text-biomed-teal">Health Blog</a></li> */}
+              <li><Link to="/blogs" className="hover:text-biomed-teal">Blog</Link></li>
               <li><Link to="/about" className="hover:text-biomed-teal">About Us</Link></li>
               {/* <li><a href="#" className="hover:text-biomed-teal">Careers</a></li> */}
               <li><Link to="/contact" className="hover:text-biomed-teal">Contact Us</Link></li>
@@ -212,6 +210,15 @@ const Header = ({ cartCount = 0, onCartClick }) => {
                   onClick={handleMobileMenuClose}
                 >
                   Offers
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/blogs" 
+                  className="block py-2 text-base font-medium hover:text-biomed-teal transition-colors"
+                  onClick={handleMobileMenuClose}
+                >
+                  Blog
                 </Link>
               </li>
               <li>

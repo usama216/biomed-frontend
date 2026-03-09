@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar, Clock } from 'lucide-react';
 
 const WellnessBlog = () => {
@@ -40,9 +41,14 @@ const WellnessBlog = () => {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">
-          WELLNESS BLOG
-        </h2>
+        <div className="flex flex-col items-center mb-12">
+          <h2 className="text-4xl font-bold text-center text-gray-900">
+            WELLNESS BLOG
+          </h2>
+          <Link to="/blogs" className="mt-4 text-biomed-teal font-semibold hover:text-biomed-navy hover:underline">
+            View all posts →
+          </Link>
+        </div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {/* Main Blog Post */}
@@ -66,9 +72,9 @@ const WellnessBlog = () => {
                     <Calendar size={16} />
                     <span>{mainPost.date}</span>
                   </div>
-                  <a href="#" className="text-biomed-teal font-semibold hover:text-biomed-navy">
+                  <Link to="/blogs" className="text-biomed-teal font-semibold hover:text-biomed-navy">
                     Read More →
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

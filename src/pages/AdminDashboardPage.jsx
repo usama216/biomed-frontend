@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Package, Loader2, ChevronDown, ChevronUp, Image } from 'lucide-react';
+import { LogOut, Package, Loader2, ChevronDown, ChevronUp, Image, FileText } from 'lucide-react';
 import { fetchAdminOrders, adminLogout, isAdminLoggedIn } from '../api';
 
 const AdminDashboardPage = () => {
@@ -70,6 +70,10 @@ const AdminDashboardPage = () => {
             <Link to="/admin/banners" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
               <Image size={16} />
               Banners
+            </Link>
+            <Link to="/admin/blogs" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
+              <FileText size={16} />
+              Blogs
             </Link>
             <Link to="/" className="text-sm text-gray-600 hover:text-biomed-teal">View store</Link>
             <button
