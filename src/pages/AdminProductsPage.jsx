@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Loader2, Plus, Pencil, Trash2, Package, Image as ImageIcon, ChevronUp, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, Plus, Pencil, Trash2, Package, Image as ImageIcon, ChevronUp, ChevronDown, Eye } from 'lucide-react';
 import {
-  adminLogout,
   isAdminLoggedIn,
   fetchAdminProducts,
   createProduct,
@@ -83,6 +82,8 @@ export default function AdminProductsPage() {
   const [success, setSuccess] = useState('');
 
   const [formOpen, setFormOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewProduct, setViewProduct] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -128,11 +129,6 @@ export default function AdminProductsPage() {
     }
     loadProducts();
   }, [navigate]);
-
-  const handleLogout = () => {
-    adminLogout();
-    navigate('/admin', { replace: true });
-  };
 
   const openAdd = () => {
     setEditingId(null);
@@ -375,6 +371,11 @@ export default function AdminProductsPage() {
     }
   };
 
+  const openProductPreview = (product) => {
+    setViewProduct(product);
+    setViewOpen(true);
+  };
+
   const imageUrlFor = (p) => {
     const u = p.image || '';
     if (u.startsWith('http')) return u;
@@ -384,48 +385,22 @@ export default function AdminProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-[40vh] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-biomed-teal animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Package className="w-6 h-6 text-biomed-navy" />
-              Products
-            </h1>
-            <nav className="flex gap-2">
-              <Link to="/admin/dashboard" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
-                <Package size={16} />
-                Orders
-              </Link>
-              <span className="text-gray-400">|</span>
-              <span className="text-sm font-medium text-biomed-teal">Products</span>
-              <span className="text-gray-400">|</span>
-              <Link to="/admin/banners" className="text-sm text-gray-600 hover:text-biomed-teal">Banners</Link>
-              <span className="text-gray-400">|</span>
-              <Link to="/admin/blogs" className="text-sm text-gray-600 hover:text-biomed-teal">Blogs</Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/products" className="text-sm text-gray-600 hover:text-biomed-teal">View store</Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
+    <div>
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+            <Package className="w-8 h-8 text-biomed-navy" />
+            Products
+          </h1>
+          <p className="text-gray-500 mt-1">Catalog, prices, categories & images</p>
         </div>
-      </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
         )}
@@ -496,6 +471,14 @@ export default function AdminProductsPage() {
                       <div className="flex gap-2 flex-shrink-0">
                         <button
                           type="button"
+                          onClick={() => openProductPreview(p)}
+                          className="p-2 bg-gray-100 rounded-lg hover:bg-biomed-teal/10 text-biomed-navy"
+                          title="View product"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => openEdit(p)}
                           className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
                           title="Edit"
@@ -519,7 +502,6 @@ export default function AdminProductsPage() {
             </div>
           )}
         </div>
-      </main>
 
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
@@ -854,6 +836,81 @@ export default function AdminProductsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {viewOpen && viewProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full my-8 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">{viewProduct.name}</h3>
+                <p className="text-sm text-gray-500">{viewProduct.id}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewOpen(false)}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div>
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Main image</h4>
+                  <div className="h-56 bg-gray-50 rounded-lg border flex items-center justify-center overflow-hidden">
+                    {viewProduct.image ? (
+                      <img src={displayImageSrc(viewProduct.image)} alt="" className="max-h-full max-w-full object-contain" />
+                    ) : (
+                      <span className="text-gray-400 text-sm">No image</span>
+                    )}
+                  </div>
+                </div>
+                {!!viewProduct.images?.length && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Gallery</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {viewProduct.images.map((u, i) => (
+                        <div key={`${u}-${i}`} className="h-20 bg-gray-50 rounded border flex items-center justify-center overflow-hidden">
+                          <img src={displayImageSrc(u)} alt="" className="max-h-full max-w-full object-contain" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <p><strong>Price:</strong> Rs. {viewProduct.discountedPrice} (Original: Rs. {viewProduct.originalPrice})</p>
+                <p><strong>Stock:</strong> {viewProduct.inStock ? 'In stock' : 'Out of stock'}</p>
+                <p><strong>Pack size:</strong> {viewProduct.packSize || '—'}</p>
+                <p><strong>Wellness coins:</strong> {viewProduct.wellnessCoins ?? '—'}</p>
+                <p><strong>Categories:</strong> {Array.isArray(viewProduct.category) ? viewProduct.category.join(', ') : (viewProduct.category || '—')}</p>
+                {viewProduct.description ? <p><strong>Description:</strong> {viewProduct.description}</p> : null}
+                {viewProduct.details ? <p><strong>Details:</strong> {viewProduct.details}</p> : null}
+                {viewProduct.directions ? <p><strong>Directions:</strong> {viewProduct.directions}</p> : null}
+                {Array.isArray(viewProduct.helps) && viewProduct.helps.length > 0 && (
+                  <div>
+                    <strong>Helps:</strong>
+                    <ul className="list-disc pl-5 mt-1 space-y-1">
+                      {viewProduct.helps.map((h, i) => <li key={i}>{h}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {Array.isArray(viewProduct.ingredients) && viewProduct.ingredients.length > 0 && (
+                  <div>
+                    <strong>Ingredients:</strong>
+                    <ul className="mt-1 space-y-1">
+                      {viewProduct.ingredients.map((ing, i) => (
+                        <li key={i}>- {ing.name || 'Ingredient'}{ing.amount ? ` | ${ing.amount}` : ''}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

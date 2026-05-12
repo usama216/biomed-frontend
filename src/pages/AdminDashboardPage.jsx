@@ -1,7 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Package, Loader2, ChevronDown, ChevronUp, Image, FileText } from 'lucide-react';
-import { fetchAdminOrders, adminLogout, isAdminLoggedIn } from '../api';
+import {
+  Package,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  Image,
+  FileText,
+  LayoutDashboard,
+  ArrowRight,
+} from 'lucide-react';
+import { fetchAdminOrders, isAdminLoggedIn } from '../api';
+
+const QUICK_LINKS = [
+  {
+    to: '/admin/dashboard',
+    title: 'Orders',
+    description: 'Payments & COD orders',
+    icon: LayoutDashboard,
+    accent: 'border-teal-100 hover:border-teal-300 bg-teal-50/30',
+  },
+  {
+    to: '/admin/products',
+    title: 'Products',
+    description: 'Catalog, pricing & photos',
+    icon: Package,
+    accent: 'border-gray-200 hover:border-gray-300 bg-slate-50/50',
+  },
+  {
+    to: '/admin/banners',
+    title: 'Banners',
+    description: 'Homepage hero carousel',
+    icon: Image,
+    accent: 'border-amber-100 hover:border-amber-300 bg-amber-50/40',
+  },
+  {
+    to: '/admin/blogs',
+    title: 'Blogs',
+    description: 'Articles & health tips',
+    icon: FileText,
+    accent: 'border-emerald-100 hover:border-emerald-300 bg-emerald-50/30',
+  },
+];
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -32,11 +72,6 @@ const AdminDashboardPage = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  const handleLogout = () => {
-    adminLogout();
-    navigate('/admin', { replace: true });
-  };
-
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
@@ -51,53 +86,44 @@ const AdminDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-[40vh] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-biomed-teal animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Admin header */}
-      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Package className="w-6 h-6 text-biomed-navy" />
-            <h1 className="text-xl font-bold text-gray-900">Orders Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/admin/banners" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
-              <Image size={16} />
-              Banners
-            </Link>
-            <Link to="/admin/products" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
-              <Package size={16} />
-              Products
-            </Link>
-            <Link to="/admin/blogs" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
-              <FileText size={16} />
-              Blogs
-            </Link>
-            <Link to="/" className="text-sm text-gray-600 hover:text-biomed-teal">View store</Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+        <p className="text-gray-500 mt-1">Overview and recent orders</p>
+      </div>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
-        )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
+        {QUICK_LINKS.map(({ to, title, description, icon: Icon, accent }) => (
+          <Link
+            key={to}
+            to={to}
+            className={`group relative overflow-hidden rounded-2xl border ${accent} p-5 shadow-sm hover:shadow-md transition-all`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="rounded-xl bg-white/80 p-2.5 shadow-sm ring-1 ring-gray-100">
+                <Icon className="w-6 h-6 text-biomed-navy" />
+              </div>
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-biomed-teal group-hover:translate-x-0.5 transition-transform" />
+            </div>
+            <h2 className="mt-4 font-semibold text-gray-900 group-hover:text-biomed-navy">{title}</h2>
+            <p className="text-sm text-gray-500 mt-1">{description}</p>
+          </Link>
+        ))}
+      </div>
 
-        <div className="bg-white rounded-xl shadow border overflow-hidden">
-          <div className="px-6 py-4 border-b">
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
+      )}
+
+      <div className="bg-white rounded-xl shadow border overflow-hidden">
+          <div className="px-6 py-4 border-b bg-gray-50/80">
             <h2 className="text-lg font-semibold text-gray-900">All orders</h2>
             <p className="text-sm text-gray-500">{orders.length} order(s)</p>
           </div>
@@ -194,7 +220,6 @@ const AdminDashboardPage = () => {
             </div>
           )}
         </div>
-      </main>
     </div>
   );
 };

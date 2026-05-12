@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, LogOut, Loader2, Plus, Pencil, Trash2, Package, Image as ImageIcon } from 'lucide-react';
-import { fetchAdminBlogs, createBlog, updateBlog, deleteBlog, adminLogout, isAdminLoggedIn } from '../api';
+import { FileText, Loader2, Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
+import { fetchAdminBlogs, createBlog, updateBlog, deleteBlog, isAdminLoggedIn } from '../api';
 import RichTextEditor from '../components/RichTextEditor';
 
 const CATEGORIES = ['Health', 'Wellness', 'Nutrition', 'Lifestyle', 'Other'];
@@ -46,11 +46,6 @@ const AdminBlogsPage = () => {
     }
     loadBlogs();
   }, [navigate]);
-
-  const handleLogout = () => {
-    adminLogout();
-    navigate('/admin', { replace: true });
-  };
 
   const openAdd = () => {
     setEditingId(null);
@@ -152,48 +147,30 @@ const AdminBlogsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-[40vh] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-biomed-teal animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="w-6 h-6 text-biomed-navy" />
+    <div>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+              <FileText className="w-8 h-8 text-biomed-navy" />
               Blogs
             </h1>
-            <nav className="flex gap-2">
-              <Link to="/admin/dashboard" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
-                <Package size={16} />
-                Orders
-              </Link>
-              <span className="text-gray-400">|</span>
-              <Link to="/admin/products" className="text-sm text-gray-600 hover:text-biomed-teal">Products</Link>
-              <span className="text-gray-400">|</span>
-              <Link to="/admin/banners" className="text-sm text-gray-600 hover:text-biomed-teal">Banners</Link>
-              <span className="text-gray-400">|</span>
-              <span className="text-sm font-medium text-biomed-teal">Blogs</span>
-            </nav>
+            <p className="text-gray-500 mt-1">Create and publish articles for the website</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/blogs" className="text-sm text-gray-600 hover:text-biomed-teal">View blogs on site</Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
+          <Link
+            to="/blogs"
+            className="text-sm font-medium text-biomed-teal hover:underline shrink-0"
+          >
+            View blogs on site →
+          </Link>
         </div>
-      </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
         )}
@@ -292,7 +269,6 @@ const AdminBlogsPage = () => {
             </div>
           )}
         </div>
-      </main>
 
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">

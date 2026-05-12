@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Image, LogOut, Loader2, Plus, Pencil, Trash2, Package } from 'lucide-react';
-import { fetchAdminBanners, createBanner, updateBanner, deleteBanner, adminLogout, isAdminLoggedIn } from '../api';
+import { useNavigate } from 'react-router-dom';
+import { Image, Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { fetchAdminBanners, createBanner, updateBanner, deleteBanner, isAdminLoggedIn } from '../api';
 
 const AdminBannersPage = () => {
   const navigate = useNavigate();
@@ -37,11 +37,6 @@ const AdminBannersPage = () => {
     }
     loadBanners();
   }, [navigate]);
-
-  const handleLogout = () => {
-    adminLogout();
-    navigate('/admin', { replace: true });
-  };
 
   const openAdd = () => {
     setEditingId(null);
@@ -126,44 +121,22 @@ const AdminBannersPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-[40vh] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-biomed-teal animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Image className="w-6 h-6 text-biomed-navy" />
-              Banner Images
-            </h1>
-            <nav className="flex gap-2">
-              <Link to="/admin/dashboard" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
-                <Package size={16} />
-                Orders
-              </Link>
-              <span className="text-gray-400">|</span>
-              <span className="text-sm font-medium text-biomed-teal">Banners</span>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-sm text-gray-600 hover:text-biomed-teal">View store</Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
+    <div>
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+            <Image className="w-8 h-8 text-biomed-navy" />
+            Banners
+          </h1>
+          <p className="text-gray-500 mt-1">Homepage hero carousel images</p>
         </div>
-      </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
         )}
@@ -239,7 +212,6 @@ const AdminBannersPage = () => {
             </div>
           )}
         </div>
-      </main>
 
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
