@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Star, ShoppingCart, Grid, List } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
+import { fetchProducts } from '../api';
+import { PRODUCT_NAV_CATEGORIES } from '../constants/productCategories';
 
 const ProductsPage = ({ addToCart, variant }) => {
   const isOffers = variant === 'offers';
@@ -10,20 +12,37 @@ const ProductsPage = ({ addToCart, variant }) => {
   const [viewMode, setViewMode] = useState('grid');
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sortBy, setSortBy] = useState('bestselling');
+  const [products, setProducts] = useState([]);
+  const [productsError, setProductsError] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const categories = [
-    'All Products', 'B Vitamins', 'Beauty', 'Best Selling', 'Blood Sugar Support',
-    'Bones & Joints', "Children's Health", 'Digestive Health',
-    'Fertility Support', 'Fish Oil', 'Glutathione', 'Hair Care',
-    'Heart Health','Immune Support', 'Memory & Brain Support',
-    "Men's Health", 'Multivitamins', "Women's Health"
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchProducts();
+        if (!cancelled) {
+          setProducts(Array.isArray(data) ? data : []);
+          setProductsError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setProductsError(err.message || 'Failed to load products');
+          setProducts([]);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const products = [
+  const categories = PRODUCT_NAV_CATEGORIES;
+
+  const staticProducts = [
     {
       id: 'prod-1',
       name: 'Magioo Magnesium Glycinate (1000mg)',
@@ -97,18 +116,6 @@ const ProductsPage = ({ addToCart, variant }) => {
       category: 'B Vitamins'
     },
     {
-      id: 'prod-7',
-      name: 'Nurose Collagen capsules',
-      rating: 4.7,
-      reviews: 95,
-      originalPrice: 1990,
-      discountedPrice: 1990,
-      image: '/assets/new-products/product-7.jpeg',
-      description: 'Nurose Collagen capsules are a dietary supplement packed with Vitamin C (20 mg), Biotin (2500 mcg), and Collagen (1000 mg) in each dose. The blend works to boost beauty and wellness from the inside out, delivering thicker healthier hair, youthful skin, and stronger nails.',
-      inStock: true,
-      category: ['Beauty', 'Hair Care']
-    },
-    {
       id: 'prod-8',
       name: 'NORO tablet 20s',
       rating: 4.6,
@@ -119,30 +126,6 @@ const ProductsPage = ({ addToCart, variant }) => {
       description: 'Noro tablets are a nutraceutical dietary supplement marketed by Biomed Innovation Pharmaceuticals Pvt Ltd. Each tablet contains Calcium L-5-Methyltetrahydrofolate (490 mcg), Vitamin B6 (1.3 mg), and Vitamin B12 (1 mcg). The product is designed to support cognitive function, healthy red blood cell formation, and boost energy levels.',
       inStock: true,
       category: 'Blood Sugar Support'
-    },
-    {
-      id: 'prod-9',
-      name: 'VNUR MEN Once a Day Multi – Dietary Supplement',
-      rating: 4.7,
-      reviews: 145,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      image: '/assets/new-products/product-9.jpeg',
-      description: 'A once‑daily multivitamin tablet formulated for adult men, enriched with Coenzyme Q10, Ginkgo biloba, L‑Carnitine & L‑Arginine. Key benefits include nutritional support for overall health, energy metabolism enhancement, muscle strength assistance, and immunity boost.',
-      inStock: true,
-      category: ['Fertility Support', "Men's Health", 'Multivitamins']
-    },
-    {
-      id: 'prod-10',
-      name: 'VNUR WOMEN tablets 30s',
-      rating: 4.7,
-      reviews: 156,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      image: '/assets/new-products/product-10.jpeg',
-      description: 'A once‑daily multivitamin tablet specially formulated for adult women, enriched with Inositol, Alpha Lipoic Acid & Biotin 2500 mcg. Key benefits include nutritional support for overall health, energy metabolism boost, healthy hair, skin & nails, and immunity enhancement.',
-      inStock: true,
-      category: ['Multivitamins', "Women's Health"]
     },
     {
       id: 'prod-11',
@@ -193,6 +176,7 @@ const ProductsPage = ({ addToCart, variant }) => {
       category: 'Bones & Joints'
     }
   ];
+  const effectiveProducts = products.length ? products : staticProducts;
 
   const getCategoryTitle = () => {
     if (isOffers && !category) return 'Offers & Discounts';
@@ -215,22 +199,22 @@ const ProductsPage = ({ addToCart, variant }) => {
 
   // Filter products based on selected category (offers page: all when no category, else by category)
   const filteredProducts = React.useMemo(() => {
-    if (!category || category === 'all-products') return products;
+    if (!category || category === 'all-products') return effectiveProducts;
     
     const selectedCategory = categories.find(cat => 
       normalizeCategoryName(cat) === category
     );
     
-    if (!selectedCategory) return products;
+    if (!selectedCategory) return effectiveProducts;
     
-    return products.filter(product => {
+    return effectiveProducts.filter(product => {
       if (!product.category) return false;
       if (Array.isArray(product.category)) {
         return product.category.includes(selectedCategory);
       }
       return product.category === selectedCategory;
     });
-  }, [category, products]);
+  }, [category, effectiveProducts]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -267,6 +251,11 @@ const ProductsPage = ({ addToCart, variant }) => {
       )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {productsError && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+            {productsError}. Showing fallback product list.
+          </div>
+        )}
         <div className="grid md:grid-cols-4 gap-8">
           {/* Left Sidebar - Filters */}
           <div className="md:col-span-1">

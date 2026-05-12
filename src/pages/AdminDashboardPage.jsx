@@ -71,6 +71,10 @@ const AdminDashboardPage = () => {
               <Image size={16} />
               Banners
             </Link>
+            <Link to="/admin/products" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
+              <Package size={16} />
+              Products
+            </Link>
             <Link to="/admin/blogs" className="text-sm text-gray-600 hover:text-biomed-teal flex items-center gap-1">
               <FileText size={16} />
               Blogs

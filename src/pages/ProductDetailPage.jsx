@@ -2,12 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Star, Plus, Minus, ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
+import { fetchProduct } from '../api';
 
 const ProductDetailPage = ({ addToCart }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [apiProduct, setApiProduct] = useState(null);
+  const [apiError, setApiError] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     details: true,
     directions: true,
@@ -21,6 +24,27 @@ const ProductDetailPage = ({ addToCart }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
     setSelectedImage(0);
+  }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const p = await fetchProduct(id);
+        if (!cancelled) {
+          setApiProduct(p);
+          setApiError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setApiProduct(null);
+          setApiError(err.message || 'Failed to load product');
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const toggleSection = (section) => {
@@ -209,33 +233,6 @@ const ProductDetailPage = ({ addToCart }) => {
         { name: 'Mecobalamin', amount: '2000 mcg' }
       ]
     },
-    'prod-7': {
-      id: 'prod-7',
-      name: 'Nurose Collagen capsules',
-      rating: 4.7,
-      reviews: 95,
-      questions: 4,
-      originalPrice: 1990,
-      discountedPrice: 1990,
-      images: [
-        '/assets/new-products/product-7.jpeg'
-      ],
-      packSize: '30 Capsules',
-      wellnessCoins: 1990,
-      inStock: true,
-      helps: [
-        'Thicker, healthier hair – thanks to biotin and collagen nourishment',
-        'Youthful skin – collagen and vitamin C improve texture and reduce signs of aging',
-        'Stronger nails – biotin fortifies nail structure for less splitting'
-      ],
-      details: 'Nurose Collagen capsules are a dietary supplement packed with Vitamin C (20 mg), Biotin (2500 mcg), and Collagen (1000 mg) in each dose. The blend works to boost beauty and wellness from the inside out. Collagen (1000 mg) supports skin elasticity and joint health, helping you achieve youthful, radiant skin and stronger connective tissues. Biotin (2500 mcg) promotes healthy hair and nails, making them thicker and less prone to breakage. Vitamin C (20 mg) enhances collagen synthesis and acts as an antioxidant, protecting skin cells and boosting overall immunity. Together, these ingredients deliver three key benefits: thicker, healthier hair, youthful skin, and stronger nails. Each pack contains 30 capsules, to be taken daily with a meal for best results. Marketed by Biomed Innovation Pharmaceuticals under the DRAP Act 2012.',
-      directions: 'Take 1 capsule daily with a meal for best results, or as directed by a healthcare professional. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Collagen', amount: '1000 mg' },
-        { name: 'Biotin', amount: '2500 mcg' },
-        { name: 'Vitamin C', amount: '20 mg' }
-      ]
-    },
     'prod-8': {
       id: 'prod-8',
       name: 'NORO tablet 20s',
@@ -261,88 +258,6 @@ const ProductDetailPage = ({ addToCart }) => {
         { name: 'Calcium L-5-Methyltetrahydrofolate', amount: '490 mcg' },
         { name: 'Vitamin B6', amount: '1.3 mg' },
         { name: 'Vitamin B12', amount: '1 mcg' }
-      ]
-    },
-    'prod-9': {
-      id: 'prod-9',
-      name: 'VNUR MEN Once a Day Multi – Dietary Supplement',
-      rating: 4.7,
-      reviews: 145,
-      questions: 7,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      images: [
-        '/assets/new-products/product-9.jpeg'
-      ],
-      packSize: '30 Tablets',
-      wellnessCoins: 1890,
-      inStock: true,
-      helps: [
-        'Nutritional support for overall health',
-        'Energy metabolism enhancement',
-        'Muscle strength assistance',
-        'Immunity boost'
-      ],
-      details: 'A once‑daily multivitamin tablet formulated for adult men, enriched with Coenzyme Q10, Ginkgo biloba, L‑Carnitine & L‑Arginine. Key benefits include nutritional support for overall health, energy metabolism enhancement, muscle strength assistance, and immunity boost. Pack of 30 tablets (serving size = 1 tablet). Complies with DRAP Act 2012; GMP certified. This is a nutraceutical supplement, not a treatment for any disease.',
-      directions: 'Take one tablet daily with a meal or as directed by a physician. Do not exceed the recommended dose. For adult men only. Consult a physician before use if taking other medications or allergic to any ingredient. Discontinue use and consult a doctor if any adverse reaction occurs. Store in a cool, dry place away from sunlight, heat & moisture. Keep out of reach of children.',
-      ingredients: [
-        { name: 'Retinol acetate (Vitamin A)', amount: '3500 IU' },
-        { name: 'Ascorbic acid (Vitamin C)', amount: '60 mg' },
-        { name: 'Cholecalciferol (Vitamin D3)', amount: '1000 IU' },
-        { name: 'Alpha tocopherol acetate (Vitamin E)', amount: '50 IU' },
-        { name: 'Coenzyme Q10', amount: '50 mg' },
-        { name: 'L‑Arginine', amount: '100 mg' },
-        { name: 'L‑Carnitine', amount: '20 mg' },
-        { name: 'Ginkgo biloba extract', amount: '50 mg' },
-        { name: 'Thiamine HCL (Vitamin B1)', amount: '2 mg' },
-        { name: 'Riboflavin (Vitamin B2)', amount: '2 mg' },
-        { name: 'Niacin (Vitamin B3)', amount: '30 mg' },
-        { name: 'Pyridoxine HCL (Vitamin B6)', amount: '10 mg' },
-        { name: 'Folic acid', amount: '400 mcg' },
-        { name: 'Cyanocobalamine (Vitamin B12)', amount: '50 mcg' },
-        { name: 'Biotin', amount: '500 mcg' },
-        { name: 'Calcium pantothenate', amount: '10 mg' }
-      ]
-    },
-    'prod-10': {
-      id: 'prod-10',
-      name: 'VNUR WOMEN tablets 30s',
-      rating: 4.7,
-      reviews: 156,
-      questions: 7,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      images: [
-        '/assets/new-products/product-10.jpeg'
-      ],
-      packSize: '30 Tablets',
-      wellnessCoins: 1890,
-      inStock: true,
-      helps: [
-        'Nutritional support for overall health',
-        'Energy metabolism boost',
-        'Healthy hair, skin & nails',
-        'Immunity enhancement'
-      ],
-      details: 'Biomed Innovation Pharmaceuticals – VNUR WOMEN Once a Day Multi – Dietary Supplement. A once‑daily multivitamin tablet specially formulated for adult women, enriched with Inositol, Alpha Lipoic Acid & Biotin 2500 mcg. Key benefits include nutritional support for overall health, energy metabolism boost, healthy hair, skin & nails, and immunity enhancement. Pack of 30 tablets (serving size = 1 tablet). Complies with DRAP Act 2012; GMP certified. This is a nutraceutical supplement, not a treatment for any disease.',
-      directions: 'Take one tablet daily with a meal or as directed by a physician. Do not exceed the recommended dose. For adult women only. Consult a physician if pregnant, breastfeeding, on other medications, or allergic to any ingredient. Stop use and seek medical advice if any adverse reaction occurs. Store in a cool, dry place away from sunlight, heat & moisture. Keep out of children\'s reach.',
-      ingredients: [
-        { name: 'Retinol acetate (Vit A)', amount: '2500 IU' },
-        { name: 'Ascorbic acid (Vit C)', amount: '100 mg' },
-        { name: 'Cholecalciferol (Vit D3)', amount: '800 IU' },
-        { name: 'Alpha tocopherol acetate (Vit E)', amount: '30 IU' },
-        { name: 'Thiamine HCL (Vit B1)', amount: '1.5 mg' },
-        { name: 'Riboflavin (Vit B2)', amount: '2 mg' },
-        { name: 'Niacin (Vit B3)', amount: '22 mg' },
-        { name: 'Pyridoxine HCL (Vit B6)', amount: '2 mg' },
-        { name: 'Folic acid', amount: '600 mcg' },
-        { name: 'Cyanocobalamin (Vit B12)', amount: '10 mcg' },
-        { name: 'Biotin', amount: '2500 mcg' },
-        { name: 'Calcium Pantothenate', amount: '15 mg' },
-        { name: 'Vitamin K2', amount: '90 mcg' },
-        { name: 'Inositol', amount: '50 mg' },
-        { name: 'Coenzyme Q10', amount: '30 mg' },
-        { name: 'Alpha Lipoic Acid', amount: '25 mg' }
       ]
     },
     'prod-11': {
@@ -466,8 +381,8 @@ const ProductDetailPage = ({ addToCart }) => {
     }
   };
 
-  // Get current product based on URL parameter
-  const product = productsDatabase[id] || productsDatabase['prod-1'];
+  // Get current product based on URL parameter (API first, then local fallback)
+  const product = apiProduct || productsDatabase[id] || productsDatabase['prod-1'];
 
   // All products from landing page
   const allProducts = [
@@ -526,15 +441,6 @@ const ProductDetailPage = ({ addToCart }) => {
       image: '/assets/new-products/product-6.jpeg'
     },
     {
-      id: 'prod-7',
-      name: 'Nurose Collagen capsules',
-      rating: 4.7,
-      reviews: 95,
-      originalPrice: 1990,
-      discountedPrice: 1990,
-      image: '/assets/new-products/product-7.jpeg'
-    },
-    {
       id: 'prod-8',
       name: 'NORO tablet 20s',
       rating: 4.6,
@@ -542,24 +448,6 @@ const ProductDetailPage = ({ addToCart }) => {
       originalPrice: 1400,
       discountedPrice: 1400,
       image: '/assets/new-products/product-8.jpeg'
-    },
-    {
-      id: 'prod-9',
-      name: 'VNUR MEN Once a Day Multi – Dietary Supplement',
-      rating: 4.7,
-      reviews: 145,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      image: '/assets/new-products/product-9.jpeg'
-    },
-    {
-      id: 'prod-10',
-      name: 'VNUR WOMEN tablets 30s',
-      rating: 4.7,
-      reviews: 156,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      image: '/assets/new-products/product-10.jpeg'
     },
     {
       id: 'prod-11',
@@ -619,6 +507,11 @@ const ProductDetailPage = ({ addToCart }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6">
+        {apiError && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+            {apiError}. Showing fallback product details.
+          </div>
+        )}
         {/* Main Product Section */}
         <div className="grid md:grid-cols-2 gap-8 bg-white rounded-lg shadow p-6 mb-6">
           {/* Left Side - Images */}

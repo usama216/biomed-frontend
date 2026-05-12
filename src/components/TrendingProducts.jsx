@@ -2,13 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
+import { fetchProducts } from '../api';
 
 const TrendingProducts = ({ addToCart }) => {
   const [activeTab, setActiveTab] = useState('bestselling');
   const scrollContainerRef = useRef(null);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const [apiProducts, setApiProducts] = useState([]);
   
-  const products = [
+  const staticProducts = [
     {
       id: 'prod-1',
       name: 'Magioo Magnesium Glycinate (1000mg)',
@@ -64,15 +66,6 @@ const TrendingProducts = ({ addToCart }) => {
       image: '/assets/new-products/product-6.jpeg'
     },
     {
-      id: 'prod-7',
-      name: 'Nurose Collagen capsules',
-      rating: 4.7,
-      reviews: 95,
-      originalPrice: 1990,
-      discountedPrice: 1990,
-      image: '/assets/new-products/product-7.jpeg'
-    },
-    {
       id: 'prod-8',
       name: 'NORO tablet 20s',
       rating: 4.6,
@@ -80,24 +73,6 @@ const TrendingProducts = ({ addToCart }) => {
       originalPrice: 1400,
       discountedPrice: 1400,
       image: '/assets/new-products/product-8.jpeg'
-    },
-    {
-      id: 'prod-9',
-      name: 'VNUR MEN Once a Day Multi – Dietary Supplement',
-      rating: 4.7,
-      reviews: 145,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      image: '/assets/new-products/product-9.jpeg'
-    },
-    {
-      id: 'prod-10',
-      name: 'VNUR WOMEN tablets 30s',
-      rating: 4.7,
-      reviews: 156,
-      originalPrice: 1890,
-      discountedPrice: 1890,
-      image: '/assets/new-products/product-10.jpeg'
     },
     {
       id: 'prod-11',
@@ -136,6 +111,23 @@ const TrendingProducts = ({ addToCart }) => {
       image: '/assets/new-products/product-14.jpeg'
     }
   ];
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchProducts();
+        if (!cancelled) setApiProducts(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setApiProducts([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const products = apiProducts.length ? apiProducts : staticProducts;
 
   // Duplicate products for seamless infinite scroll
   const duplicatedProducts = [...products, ...products, ...products];

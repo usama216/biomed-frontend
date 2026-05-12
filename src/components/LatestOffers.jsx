@@ -2,12 +2,14 @@ import React, { useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
+import { fetchProducts } from '../api';
 
 const LatestOffers = ({ addToCart }) => {
   const scrollContainerRef = useRef(null);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const [apiOffers, setApiOffers] = useState([]);
   
-  const offers = [
+  const staticOffers = [
     {
       id: 'prod-1',
       name: 'Magioo Magnesium Glycinate (1000mg)',
@@ -69,16 +71,6 @@ const LatestOffers = ({ addToCart }) => {
       discountedPrice: 1420
     },
     {
-      id: 'prod-7',
-      name: 'Nurose Collagen capsules',
-      price: 1990,
-      image: '/assets/new-products/product-7.jpeg',
-      rating: 4.7,
-      reviews: 95,
-      originalPrice: 1990,
-      discountedPrice: 1990
-    },
-    {
       id: 'prod-8',
       name: 'NORO tablet 20s',
       price: 1400,
@@ -87,26 +79,6 @@ const LatestOffers = ({ addToCart }) => {
       reviews: 112,
       originalPrice: 1400,
       discountedPrice: 1400
-    },
-    {
-      id: 'prod-9',
-      name: 'VNUR MEN Once a Day Multi – Dietary Supplement',
-      price: 1890,
-      image: '/assets/new-products/product-9.jpeg',
-      rating: 4.7,
-      reviews: 145,
-      originalPrice: 1890,
-      discountedPrice: 1890
-    },
-    {
-      id: 'prod-10',
-      name: 'VNUR WOMEN tablets 30s',
-      price: 1890,
-      image: '/assets/new-products/product-10.jpeg',
-      rating: 4.7,
-      reviews: 156,
-      originalPrice: 1890,
-      discountedPrice: 1890
     },
     {
       id: 'prod-11',
@@ -149,6 +121,23 @@ const LatestOffers = ({ addToCart }) => {
       discountedPrice: 435
     }
   ];
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchProducts();
+        if (!cancelled) setApiOffers(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setApiOffers([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const offers = apiOffers.length ? apiOffers : staticOffers;
 
   // Duplicate offers for seamless infinite scroll
   const duplicatedOffers = [...offers, ...offers, ...offers];

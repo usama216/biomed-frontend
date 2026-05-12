@@ -185,6 +185,25 @@ export async function fetchBlogs() {
   return res.json();
 }
 
+// --- Products (public) ---
+
+export async function fetchProducts() {
+  const res = await fetch(`${API_BASE}/api/products`);
+  if (!res.ok) throw new Error('Failed to load products');
+  const data = await res.json();
+  // Support both {products: []} (new) and [] (legacy)
+  return Array.isArray(data) ? data : (data.products || []);
+}
+
+export async function fetchProduct(id) {
+  const res = await fetch(`${API_BASE}/api/products/${encodeURIComponent(id)}`);
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('Product not found');
+    throw new Error('Failed to load product');
+  }
+  return res.json();
+}
+
 export async function fetchBlogByIdOrSlug(idOrSlug) {
   const res = await fetch(`${API_BASE}/api/blogs/${encodeURIComponent(idOrSlug)}`);
   if (!res.ok) {
@@ -301,6 +320,119 @@ export async function deleteBlog(id) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || 'Failed to delete blog');
+  }
+  return res.json();
+}
+
+// --- Admin Products ---
+
+export async function fetchAdminProducts() {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/products`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) throw new Error('Failed to load products');
+  return res.json();
+}
+
+export async function uploadProductImage(file) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  form.append('image', file);
+  const res = await fetch(`${API_BASE}/api/admin/products/upload-image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to upload image');
+  }
+  const data = await res.json();
+  return data.url;
+}
+
+export async function createProduct(payload) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  Object.entries(payload || {}).forEach(([k, v]) => {
+    if (v === undefined || v === null) return;
+    // Send arrays/objects as JSON strings (category, images, ingredients)
+    if (typeof v === 'object' && !(v instanceof File)) {
+      form.append(k, JSON.stringify(v));
+      return;
+    }
+    form.append(k, String(v));
+  });
+  const res = await fetch(`${API_BASE}/api/admin/products`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to add product');
+  }
+  return res.json();
+}
+
+export async function updateProduct(id, payload) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const form = new FormData();
+  Object.entries(payload || {}).forEach(([k, v]) => {
+    if (v === undefined || v === null) return;
+    if (typeof v === 'object' && !(v instanceof File)) {
+      form.append(k, JSON.stringify(v));
+      return;
+    }
+    form.append(k, String(v));
+  });
+  const res = await fetch(`${API_BASE}/api/admin/products/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to update product');
+  }
+  return res.json();
+}
+
+export async function deleteProduct(id) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/products/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to delete product');
   }
   return res.json();
 }

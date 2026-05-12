@@ -173,6 +173,8 @@ const AdminBlogsPage = () => {
                 Orders
               </Link>
               <span className="text-gray-400">|</span>
+              <Link to="/admin/products" className="text-sm text-gray-600 hover:text-biomed-teal">Products</Link>
+              <span className="text-gray-400">|</span>
               <Link to="/admin/banners" className="text-sm text-gray-600 hover:text-biomed-teal">Banners</Link>
               <span className="text-gray-400">|</span>
               <span className="text-sm font-medium text-biomed-teal">Blogs</span>
