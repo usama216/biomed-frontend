@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Star, Plus, Minus, ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, Plus, Minus, ShoppingCart, ChevronDown, Loader2 } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
 import { fetchProduct } from '../api';
@@ -9,8 +9,9 @@ const ProductDetailPage = ({ addToCart }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [apiProduct, setApiProduct] = useState(null);
-  const [apiError, setApiError] = useState('');
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     details: true,
     directions: true,
@@ -19,27 +20,31 @@ const ProductDetailPage = ({ addToCart }) => {
     reviews: false,
     quality: false
   });
-  const relatedScrollRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setSelectedImage(0);
+    setQuantity(1);
   }, [id]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      setLoading(true);
+      setProduct(null);
+      setError('');
       try {
         const p = await fetchProduct(id);
         if (!cancelled) {
-          setApiProduct(p);
-          setApiError('');
+          setProduct(p);
         }
       } catch (err) {
         if (!cancelled) {
-          setApiProduct(null);
-          setApiError(err.message || 'Failed to load product');
+          setProduct(null);
+          setError(err.message || 'Failed to load product');
         }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
@@ -54,487 +59,65 @@ const ProductDetailPage = ({ addToCart }) => {
     }));
   };
 
-  const scrollRelatedLeft = () => {
-    if (relatedScrollRef.current) {
-      relatedScrollRef.current.scrollBy({
-        left: -220,
-        behavior: 'smooth'
-      });
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 text-biomed-teal animate-spin mb-4" />
+        <p className="text-gray-500 text-lg">Loading product…</p>
+      </div>
+    );
+  }
 
-  const scrollRelatedRight = () => {
-    if (relatedScrollRef.current) {
-      relatedScrollRef.current.scrollBy({
-        left: 220,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // Complete product database
-  const productsDatabase = {
-    'prod-1': {
-      id: 'prod-1',
-      name: 'Magioo Magnesium Glycinate (1000mg)',
-      rating: 4.8,
-      reviews: 178,
-      questions: 8,
-      originalPrice: 2390,
-      discountedPrice: 2390,
-      images: [
-        '/assets/new-products/product-1.jpeg'
-      ],
-      packSize: '30 Tablets',
-      wellnessCoins: 2390,
-      inStock: true,
-      helps: [
-        'Supports sleep quality and restful sleep',
-        'Helps nerve and muscle function',
-        'Promotes bone and heart health',
-        'Enhances nutrient absorption'
-      ],
-      details: 'Magioo Magnesium Glycinate is a dietary supplement tablet containing 1000 mg of Magnesium Glycinate (USP) per serving. Manufactured by Nurture Pharma, Lahore, Pakistan, and marketed by Biomed Innovation Pharmaceuticals, the product comes in a pack of 30 tablets. Key features and benefits include supporting sleep, helping nerve and muscle function, promoting bone and heart health, and enhancing nutrient absorption. This product is used for the prevention of disease, not for direct treatment. GMP certified and compliant with DRAP Act 2012. For adults only. Consult a healthcare professional if you are pregnant, breastfeeding, or taking other medicines. Discontinue use if allergic or adverse reactions occur. Protect from light, heat and moisture. Store below 30°C in a dry place. Keep out of reach of children and keep the container tightly closed after use.',
-      directions: 'Adults take 1 tablet 1–2 times daily with meals, or as directed by a physician. Do not exceed the recommended dose. For adults only. Consult a healthcare professional if you are pregnant, breastfeeding, or taking other medicines. Discontinue use if allergic or adverse reactions occur.',
-      ingredients: [
-        { name: 'Magnesium Glycinate (USP)', amount: '1000 mg' }
-      ]
-    },
-    'prod-2': {
-      id: 'prod-2',
-      name: 'Tablet Ostical-D 30s',
-      rating: 4.6,
-      reviews: 95,
-      questions: 5,
-      originalPrice: 1120,
-      discountedPrice: 1120,
-      images: [
-        '/assets/new-products/product-2.jpeg'
-      ],
-      packSize: '30 Tablets',
-      wellnessCoins: 1120,
-      inStock: true,
-      helps: [
-        'Help remove joint pain and support the development of healthy bones & teeth',
-        'Support the maintenance of strong bones',
-        'Bone health supplement'
-      ],
-      details: 'Ostical-D Tablets are a bone health supplement manufactured by Biomed Innovation Pharmaceuticals. The product is formulated with Calcium Carbonate, Magnesium, Zinc, Vitamin D3, and Vitamin K, designed to help remove joint pain and support the development of healthy bones & teeth, while also supporting the maintenance of strong bones. Packaging: 30 tablets per box.',
-      directions: 'Take as directed by a healthcare professional. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Calcium Carbonate', amount: 'As per formulation' },
-        { name: 'Magnesium', amount: 'As per formulation' },
-        { name: 'Zinc', amount: 'As per formulation' },
-        { name: 'Vitamin D3', amount: 'As per formulation' },
-        { name: 'Vitamin K', amount: 'As per formulation' }
-      ]
-    },
-    'prod-3': {
-      id: 'prod-3',
-      name: 'Tablet Zincoo 50mg',
-      rating: 4.7,
-      reviews: 142,
-      questions: 6,
-      originalPrice: 950,
-      discountedPrice: 950,
-      images: [
-        '/assets/new-products/product-3.jpeg'
-      ],
-      packSize: 'As per pack',
-      wellnessCoins: 950,
-      inStock: true,
-      helps: [
-        'Boosts immune system performance',
-        'Enhances skin health and appearance',
-        'Supports cellular growth and repair'
-      ],
-      details: 'Zincoo ZINC is a high-quality zinc supplement formulated with Zinc Gluconate 50mg per serving. It supports immune function, promotes skin health, and aids in cell growth. The product is manufactured by Biomed, emphasizing natural ingredients for optimal absorption. Key benefits include boosting immune system performance, enhancing skin health and appearance, and supporting cellular growth and repair.',
-      directions: 'As a dietary supplement, take as directed by a healthcare professional. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Zinc Gluconate', amount: '50 mg' }
-      ]
-    },
-    'prod-4': {
-      id: 'prod-4',
-      name: 'Glutamed capsule 30s',
-      rating: 4.9,
-      reviews: 203,
-      questions: 7,
-      originalPrice: 4300,
-      discountedPrice: 4300,
-      images: [
-        '/assets/new-products/product-4.jpeg'
-      ],
-      packSize: '30 Capsules',
-      wellnessCoins: 4300,
-      inStock: true,
-      helps: [
-        'Skin Lightening: helps improve skin tone and brightness',
-        'Detoxification: supports the body\'s natural detox processes',
-        'Anti-Aging: aids in reducing signs of aging'
-      ],
-      details: 'Glutamed L-Glutathione with Vitamin C is a dietary supplement manufactured by Biomed Innovation Pharmaceuticals Pvt Ltd. The product is packaged in a bottle of 30 capsules and is promoted for skin benefits, including skin lightening to help improve skin tone and brightness, detoxification to support the body\'s natural detox processes, and anti-aging to aid in reducing signs of aging. The formulation combines L-Glutathione with Vitamin C for enhanced antioxidant effects.',
-      directions: 'Take as directed by a healthcare professional. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'L-Glutathione', amount: 'As per formulation' },
-        { name: 'Vitamin C', amount: 'As per formulation' }
-      ]
-    },
-    'prod-5': {
-      id: 'prod-5',
-      name: 'Bemega (Omega-3 500mg) Capsule – BioMed Innovation',
-      rating: 4.8,
-      reviews: 167,
-      questions: 6,
-      originalPrice: 1590,
-      discountedPrice: 1590,
-      images: [
-        '/assets/new-products/product-5.jpeg'
-      ],
-      packSize: '30 Capsules',
-      wellnessCoins: 1590,
-      inStock: true,
-      helps: [
-        'Heart Health: Supports cardiovascular function and helps maintain healthy triglyceride levels',
-        'Brain Function: Enhances cognitive performance and mental clarity',
-        'Joint Support: Promotes joint mobility and reduces inflammation'
-      ],
-      details: 'Bomega Omega-3 500mg is a premium dietary supplement marketed by BioMed Innovation Pharmaceuticals (Pvt) Ltd. Each bottle contains 30 softgel capsules, providing 500mg of high-quality Omega-3 fish oil per capsule. Key benefits include heart health to support cardiovascular function and help maintain healthy triglyceride levels, brain function to enhance cognitive performance and mental clarity, and joint support to promote joint mobility and reduce inflammation. Packaging: Black bottle with a white cap; label highlights heart, brain, and joint health icons along with a fish & oil droplet graphic.',
-      directions: 'Take 1 capsule daily with meals, or as directed by a healthcare professional. Consult a physician before use if you are pregnant, nursing, or on medication. Not suitable for those with fish or shellfish allergies.',
-      ingredients: [
-        { name: 'Fish oil (EPA & DHA)', amount: '500 mg' },
-        { name: 'Gelatin', amount: 'As per formulation' },
-        { name: 'Glycerin', amount: 'As per formulation' },
-        { name: 'Purified water', amount: 'As per formulation' }
-      ]
-    },
-    'prod-6': {
-      id: 'prod-6',
-      name: 'Bio-12 Tablets (Mecobalamin 2000mcg)',
-      rating: 4.7,
-      reviews: 128,
-      questions: 5,
-      originalPrice: 1420,
-      discountedPrice: 1420,
-      images: [
-        '/assets/new-products/product-6.jpeg'
-      ],
-      packSize: 'As per pack',
-      wellnessCoins: 1420,
-      inStock: true,
-      helps: [
-        'Supports nervous system function and energy levels',
-        'Promotes healthy red blood cells',
-        'Supports nerve health and energy metabolism'
-      ],
-      details: 'Bio-12 is a dietary supplement in tablet form containing Mecobalamin 2000mcg, a form of Vitamin B12. It supports nerve health, energy metabolism, and red blood cell production. The product is marketed by Biomed Pharmaceuticals and is promoted for nervous system maintenance and increased body energy. Key features include Mecobalamin 2000mcg per tablet, supports nervous system function and energy levels, promotes healthy red blood cells, and tablet form for easy consumption.',
-      directions: 'Take as directed by a healthcare professional. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Mecobalamin', amount: '2000 mcg' }
-      ]
-    },
-    'prod-8': {
-      id: 'prod-8',
-      name: 'NORO tablet 20s',
-      rating: 4.6,
-      reviews: 112,
-      questions: 5,
-      originalPrice: 1400,
-      discountedPrice: 1400,
-      images: [
-        '/assets/new-products/product-8.jpeg'
-      ],
-      packSize: '20 Tablets',
-      wellnessCoins: 1400,
-      inStock: true,
-      helps: [
-        'Supports cognitive health',
-        'Promotes healthy RBC formation',
-        'Enhances energy levels'
-      ],
-      details: 'Noro tablets are a nutraceutical dietary supplement marketed by Biomed Innovation Pharmaceuticals Pvt Ltd. Each tablet contains Calcium L-5-Methyltetrahydrofolate (490 mcg), Vitamin B6 (1.3 mg), and Vitamin B12 (1 mcg). The product is designed to support cognitive function, healthy red blood cell formation, and boost energy levels. Noro is intended for adult men only and should be taken as one tablet daily with a meal or as directed by a physician. Key features include supporting cognitive health, promoting healthy RBC formation, enhancing energy levels, and being GMP certified & compliant with DRAP Act 2012.',
-      directions: 'Take one tablet daily with food or as prescribed. Keep out of reach of children and store in a cool, dry place away from sunlight. For adult men only. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Calcium L-5-Methyltetrahydrofolate', amount: '490 mcg' },
-        { name: 'Vitamin B6', amount: '1.3 mg' },
-        { name: 'Vitamin B12', amount: '1 mcg' }
-      ]
-    },
-    'prod-11': {
-      id: 'prod-11',
-      name: 'Teenur tablet 30s',
-      rating: 4.6,
-      reviews: 112,
-      questions: 6,
-      originalPrice: 1590,
-      discountedPrice: 1590,
-      images: [
-        '/assets/new-products/product-11.jpeg'
-      ],
-      packSize: '30 Tablets',
-      wellnessCoins: 1590,
-      inStock: true,
-      helps: [
-        'Hair Growth: strengthens follicles, promotes growth & reduces loss',
-        'Nail Health: strengthens nails & reduces breakage',
-        'Skin Health: improves hydration, elasticity & texture',
-        'Overall Wellness: supports general health, energy & immune function'
-      ],
-      details: 'Biotin + Keratin is a dietary supplement tablet containing Biotin 2500mcg and Hydrolyzed Keratin 250mg. It is designed for adult men and supports hair growth by strengthening follicles, promoting growth & reducing loss. For nail health, it strengthens nails & reduces breakage. It improves skin health by enhancing hydration, elasticity & texture. Keratin benefits include rebuilding hair, strengthening hair & nails, and enhancing skin elasticity. Overall, it supports general health, energy & immune function. Each pack contains 30 tablets, to be taken one tablet daily with a meal or as directed by a physician. Approved according to DRAP Act 2012.',
-      directions: 'Take one tablet daily with a meal or as directed by a physician. Do not exceed the recommended dose. For adult men only. Consult a physician if you are on other medications or have allergies. Discontinue use if any adverse reaction occurs. Keep out of reach of children. Store in a cool, dry place, protected from sunlight, heat & moisture.',
-      ingredients: [
-        { name: 'Biotin', amount: '2500 mcg' },
-        { name: 'Hydrolyzed Keratin', amount: '250 mg' }
-      ]
-    },
-    'prod-12': {
-      id: 'prod-12',
-      name: 'X‑NUR 30s tablet',
-      rating: 4.8,
-      reviews: 189,
-      questions: 8,
-      originalPrice: 2990,
-      discountedPrice: 2990,
-      images: [
-        '/assets/new-products/product-12.jpeg'
-      ],
-      packSize: '30 Tablets',
-      wellnessCoins: 2990,
-      inStock: true,
-      helps: [
-        'Boosts testosterone',
-        'Enhances muscle strength & performance',
-        'Supports mental health & stamina',
-        'Increases energy levels'
-      ],
-      details: 'X‑NUR herbal supplement tablets by Biomed Innovation Pharmaceuticals. Benefits include boosting testosterone, enhancing muscle strength & performance, supporting mental health & stamina, and increasing energy levels. Pack of 30 tablets per bottle. GMP certified & DRAP compliant. This is a nutraceutical supplement, not a treatment for any disease.',
-      directions: 'Take 1 tablet daily with a meal. For adult men only. Consult a doctor if on other meds or allergic. Store cool & dry. Keep out of children\'s reach.',
-      ingredients: [
-        { name: 'Horny goat weed extract (MS)', amount: '300 mg' },
-        { name: 'Tribulus terrestris extract (MS)', amount: '250 mg' },
-        { name: 'Maca root extract (MS)', amount: '75 mg' },
-        { name: 'Panax ginseng extract (USP)', amount: '50 mg' },
-        { name: 'Muira puama extract (MS)', amount: '75 mg' },
-        { name: 'Yohimbe bark extract (MS)', amount: '5 mg' },
-        { name: 'Saw palmetto berry powder extract (MS)', amount: '40 mg' },
-        { name: 'Ginkgo biloba extract (USP)', amount: '40 mg' },
-        { name: 'L‑Arginine HCl (USP)', amount: '100 mg' },
-        { name: 'Vitamin E (USP)', amount: '30 mg' }
-      ]
-    },
-    'prod-13': {
-      id: 'prod-13',
-      name: 'Ostical-D Syrup',
-      rating: 4.6,
-      reviews: 95,
-      questions: 5,
-      originalPrice: 780,
-      discountedPrice: 780,
-      images: [
-        '/assets/new-products/product-13.jpeg'
-      ],
-      packSize: '1 Bottle',
-      wellnessCoins: 780,
-      inStock: true,
-      helps: [
-        'Helps remove joint pain',
-        'Supports the development of healthy bones & teeth',
-        'Supports the maintenance of strong bones',
-        'Bone health supplement'
-      ],
-      details: 'Ostical-D Syrup is a bone health supplement by Biomed Innovation Pharmaceuticals. It contains Calcium Carbonate, Magnesium, Zinc, Vitamin D3, and Vitamin K. The syrup is designed to help remove joint pain and support the development of healthy bones & teeth, while also supporting the maintenance of strong bones.',
-      directions: 'Take as directed by a healthcare professional. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Calcium Carbonate', amount: 'As per formulation' },
-        { name: 'Magnesium', amount: 'As per formulation' },
-        { name: 'Zinc', amount: 'As per formulation' },
-        { name: 'Vitamin D3', amount: 'As per formulation' },
-        { name: 'Vitamin K', amount: 'As per formulation' }
-      ]
-    },
-    'prod-14': {
-      id: 'prod-14',
-      name: 'DeAll softgel Capsules 1s',
-      rating: 4.8,
-      reviews: 98,
-      questions: 5,
-      originalPrice: 435,
-      discountedPrice: 435,
-      images: [
-        '/assets/new-products/product-14.jpeg'
-      ],
-      packSize: '1 Softgel',
-      wellnessCoins: 435,
-      inStock: true,
-      helps: [
-        'Immune Health: Boosts the body\'s natural defense system',
-        'Energy & Vitality: Enhances overall energy levels for daily performance',
-        'Muscle Health: Supports muscle function and recovery',
-        'Bone Health: Promotes calcium utilization for strong bones and teeth'
-      ],
-      details: 'DeAll (D3 200,000 IU & Vitamin 75mcg K2) Softgel – BioMed Innovation Pharmaceuticals Pvt Ltd. DeAll is a premium softgel supplement that combines Vitamin D3 (200,000 IU) with Vitamin K2, formulated by BioMed Innovation Pharmaceuticals Pvt Ltd. This powerful blend supports multiple aspects of health, including immune function, energy & vitality, muscle strength, and bone health. Vitamin D3 ensures optimal calcium absorption, while Vitamin K2 directs calcium to the bones and teeth, promoting overall skeletal wellness.',
-      directions: 'Take 1 softgel as directed by a healthcare professional, preferably with a meal for better absorption. Do not exceed the recommended dose. Consult a physician if you are pregnant, breastfeeding, on other medications, or have any medical conditions.',
-      ingredients: [
-        { name: 'Vitamin D3 (Cholecalciferol)', amount: '200,000 IU' },
-        { name: 'Vitamin K2 (Menaquinone)', amount: '75 mcg' }
-      ]
-    }
-  };
-
-  // Get current product based on URL parameter (API first, then local fallback)
-  const product = apiProduct || productsDatabase[id] || productsDatabase['prod-1'];
-
-  // All products from landing page
-  const allProducts = [
-    {
-      id: 'prod-1',
-      name: 'Magioo Magnesium Glycinate (1000mg)',
-      rating: 4.8,
-      reviews: 178,
-      originalPrice: 2390,
-      discountedPrice: 2390,
-      image: '/assets/new-products/product-1.jpeg'
-    },
-    {
-      id: 'prod-2',
-      name: 'Tablet Ostical-D 30s',
-      rating: 4.6,
-      reviews: 95,
-      originalPrice: 1120,
-      discountedPrice: 1120,
-      image: '/assets/new-products/product-2.jpeg'
-    },
-    {
-      id: 'prod-3',
-      name: 'Tablet Zincoo 50mg',
-      rating: 4.7,
-      reviews: 142,
-      originalPrice: 950,
-      discountedPrice: 950,
-      image: '/assets/new-products/product-3.jpeg'
-    },
-    {
-      id: 'prod-4',
-      name: 'Glutamed capsule 30s',
-      rating: 4.9,
-      reviews: 203,
-      originalPrice: 4300,
-      discountedPrice: 4300,
-      image: '/assets/new-products/product-4.jpeg'
-    },
-    {
-      id: 'prod-5',
-      name: 'Bemega (Omega-3 500mg) Capsule – BioMed Innovation',
-      rating: 4.8,
-      reviews: 167,
-      originalPrice: 1590,
-      discountedPrice: 1590,
-      image: '/assets/new-products/product-5.jpeg'
-    },
-    {
-      id: 'prod-6',
-      name: 'Bio-12 Tablets (Mecobalamin 2000mcg)',
-      rating: 4.7,
-      reviews: 128,
-      originalPrice: 1420,
-      discountedPrice: 1420,
-      image: '/assets/new-products/product-6.jpeg'
-    },
-    {
-      id: 'prod-8',
-      name: 'NORO tablet 20s',
-      rating: 4.6,
-      reviews: 112,
-      originalPrice: 1400,
-      discountedPrice: 1400,
-      image: '/assets/new-products/product-8.jpeg'
-    },
-    {
-      id: 'prod-11',
-      name: 'Teenur tablet 30s',
-      rating: 4.6,
-      reviews: 112,
-      originalPrice: 1590,
-      discountedPrice: 1590,
-      image: '/assets/new-products/product-11.jpeg'
-    },
-    {
-      id: 'prod-12',
-      name: 'X‑NUR 30s tablet',
-      rating: 4.8,
-      reviews: 189,
-      originalPrice: 2990,
-      discountedPrice: 2990,
-      image: '/assets/new-products/product-12.jpeg'
-    },
-    {
-      id: 'prod-13',
-      name: 'Ostical-D Syrup',
-      rating: 4.6,
-      reviews: 95,
-      originalPrice: 780,
-      discountedPrice: 780,
-      image: '/assets/new-products/product-13.jpeg'
-    },
-    {
-      id: 'prod-14',
-      name: 'DeAll softgel Capsules 1s',
-      rating: 4.8,
-      reviews: 98,
-      originalPrice: 435,
-      discountedPrice: 435,
-      image: '/assets/new-products/product-14.jpeg'
-    }
-  ];
-
-  // Filter out current product and get related products
-  const relatedProducts = allProducts.filter(p => p.id !== id);
-
-  const certifications = ['ISO', 'GMP', 'DRAP', 'HACCP', 'HALAL', 'NON GMO', 'VEGAN'];
-
-  // Show message if product not found
   if (!product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <p className="text-gray-600">The product you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">{error || "The product you're looking for doesn't exist."}</p>
+          <Link
+            to="/products"
+            className="inline-block bg-biomed-navy hover:bg-biomed-navy/90 text-white px-6 py-2 rounded-lg font-semibold"
+          >
+            Back to Products
+          </Link>
         </div>
       </div>
     );
   }
 
+  const galleryImages =
+    product.images?.length > 0 ? product.images : product.image ? [product.image] : [];
+  const mainImage = galleryImages[selectedImage] || galleryImages[0] || '';
+  const cartImage = galleryImages[0] || product.image || '';
+  const helps = Array.isArray(product.helps) ? product.helps : [];
+  const ingredients = Array.isArray(product.ingredients) ? product.ingredients : [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6">
-        {apiError && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
-            {apiError}. Showing fallback product details.
-          </div>
-        )}
-        {/* Main Product Section */}
         <div className="grid md:grid-cols-2 gap-8 bg-white rounded-lg shadow p-6 mb-6">
-          {/* Left Side - Images */}
           <div>
-            {/* Main Image/Video - Sticky */}
             <div className="sticky top-4">
               <div className="bg-gray-50 rounded-lg p-8 mb-3 flex items-center justify-center h-[500px] relative">
-                <img 
-                  src={product.images && product.images[selectedImage] ? product.images[selectedImage] : '/assets/new-products/product-1.jpeg'} 
-                  alt={product.name}
-                  className="max-h-full max-w-full object-contain"
-                />
+                {mainImage ? (
+                  <img
+                    src={mainImage}
+                    alt={product.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <div className="text-gray-400 text-sm">No image available</div>
+                )}
                 {product.inStock && (
                   <div className="absolute top-3 left-3 bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded">
                     -15%
                   </div>
                 )}
               </div>
-              
-              {/* Thumbnail Images - Show if more than 1 image */}
-              {product.images && product.images.length > 1 && (
+
+              {galleryImages.length > 1 && (
                 <div className="flex gap-3">
-                  {product.images.map((img, idx) => (
+                  {galleryImages.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
@@ -542,8 +125,8 @@ const ProductDetailPage = ({ addToCart }) => {
                         selectedImage === idx ? 'border-biomed-teal' : 'border-transparent'
                       }`}
                     >
-                      <img 
-                        src={img} 
+                      <img
+                        src={img}
                         alt={`${product.name} ${idx + 1}`}
                         className="w-full h-16 object-contain"
                       />
@@ -554,11 +137,9 @@ const ProductDetailPage = ({ addToCart }) => {
             </div>
           </div>
 
-          {/* Right Side - Product Info */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-3">{product.name}</h1>
-            
-            {/* Stock Status */}
+
             <div className="mb-3">
               {product.inStock ? (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
@@ -572,8 +153,7 @@ const ProductDetailPage = ({ addToCart }) => {
                 </span>
               )}
             </div>
-            
-            {/* Reviews */}
+
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center gap-1">
                 <div className="flex">
@@ -581,43 +161,43 @@ const ProductDetailPage = ({ addToCart }) => {
                     <Star
                       key={i}
                       size={16}
-                      className={i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                      className={i < Math.floor(product.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
                     />
                   ))}
                 </div>
-                <span className="text-xs text-gray-600 ml-1">{product.reviews} reviews</span>
+                <span className="text-xs text-gray-600 ml-1">{product.reviews ?? 0} reviews</span>
               </div>
-              <span className="text-xs text-gray-600">{product.questions} questions</span>
+              <span className="text-xs text-gray-600">{product.questions ?? 0} questions</span>
             </div>
 
-            {/* Price */}
             <div className="mb-4 flex items-center gap-3">
               <span className="text-gray-500 line-through text-lg">Rs. {product.originalPrice}</span>
               <span className="text-2xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice)}</span>
             </div>
 
-            {/* Helps Section */}
-            <div className="mb-4 bg-blue-50 p-3 rounded-lg">
-              <h3 className="font-semibold text-sm mb-2">Helps to:</h3>
-              <ul className="space-y-1">
-                {product.helps.map((help, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-biomed-teal text-xs mt-0.5">•</span>
-                    <span className="text-xs text-gray-700">{help}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {helps.length > 0 && (
+              <div className="mb-4 bg-blue-50 p-3 rounded-lg">
+                <h3 className="font-semibold text-sm mb-2">Helps to:</h3>
+                <ul className="space-y-1">
+                  {helps.map((help, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="text-biomed-teal text-xs mt-0.5">•</span>
+                      <span className="text-xs text-gray-700">{help}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            {/* Pack Size */}
-            <div className="mb-3">
-              <label className="block text-xs font-semibold mb-1">Pack Size:</label>
-              <button className="px-4 py-1.5 bg-biomed-navy text-white rounded text-sm font-semibold">
-                {product.packSize}
-              </button>
-            </div>
+            {product.packSize && (
+              <div className="mb-3">
+                <label className="block text-xs font-semibold mb-1">Pack Size:</label>
+                <button className="px-4 py-1.5 bg-biomed-navy text-white rounded text-sm font-semibold">
+                  {product.packSize}
+                </button>
+              </div>
+            )}
 
-            {/* Quantity Selector */}
             <div className="mb-4">
               <label className="block text-xs font-semibold mb-1">Quantity:</label>
               <div className="flex items-center border rounded w-fit">
@@ -637,21 +217,30 @@ const ProductDetailPage = ({ addToCart }) => {
               </div>
             </div>
 
-            {/* Wellness Coins */}
             <div className="mb-4 bg-purple-50 p-3 rounded-lg">
-              <p className="text-sm font-semibold text-purple-700">{product.wellnessCoins} Wellness Coins</p>
+              <p className="text-sm font-semibold text-purple-700">{product.wellnessCoins ?? 0} Wellness Coins</p>
               <a href="#" className="text-xs text-purple-600 underline">How it works?</a>
             </div>
 
-            {/* Subtotal */}
             <div className="mb-4">
-              <p className="text-base font-semibold">Subtotal: <span className="text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice) * quantity}</span></p>
+              <p className="text-base font-semibold">
+                Subtotal:{' '}
+                <span className="text-biomed-teal">
+                  Rs. {getDiscountedPrice(product.originalPrice) * quantity}
+                </span>
+              </p>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-3 mb-4">
-              <button 
-                onClick={() => addToCart({...product, quantity, discountedPrice: getDiscountedPrice(product.originalPrice), image: product.images && product.images[0] ? product.images[0] : '/assets/products/main-product.jpeg'})}
+              <button
+                onClick={() =>
+                  addToCart({
+                    ...product,
+                    quantity,
+                    discountedPrice: getDiscountedPrice(product.originalPrice),
+                    image: cartImage,
+                  })
+                }
                 disabled={!product.inStock}
                 className={`flex-1 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
                   product.inStock
@@ -662,12 +251,20 @@ const ProductDetailPage = ({ addToCart }) => {
                 <ShoppingCart size={16} />
                 {product.inStock ? 'ADD TO CART' : 'OUT OF STOCK'}
               </button>
-              <button 
+              <button
                 type="button"
                 disabled={!product.inStock}
                 onClick={() => {
                   if (!product.inStock) return;
-                  addToCart({ ...product, quantity, discountedPrice: getDiscountedPrice(product.originalPrice), image: product.images?.[0] || '/assets/products/main-product.jpeg' }, false);
+                  addToCart(
+                    {
+                      ...product,
+                      quantity,
+                      discountedPrice: getDiscountedPrice(product.originalPrice),
+                      image: cartImage,
+                    },
+                    false
+                  );
                   navigate('/checkout');
                 }}
                 className={`flex-1 py-2.5 rounded-lg font-semibold text-sm ${
@@ -680,167 +277,136 @@ const ProductDetailPage = ({ addToCart }) => {
               </button>
             </div>
 
-            {/* Product Information Accordion */}
             <div className="my-4 border rounded-lg overflow-hidden">
-              {/* Product Details */}
               <div className="border-b">
                 <button
                   onClick={() => toggleSection('details')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
                   <h3 className="text-sm font-semibold">Product Details</h3>
-                  <ChevronDown size={16} className={`transform transition-transform duration-300 ${expandedSections.details ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform duration-300 ${expandedSections.details ? 'rotate-180' : ''}`}
+                  />
                 </button>
-                <div className={`transition-all duration-300 ease-in-out ${expandedSections.details ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div
+                  className={`transition-all duration-300 ease-in-out ${expandedSections.details ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                >
                   <div className="px-3 pb-2">
-                    <p className="text-xs text-gray-700 leading-relaxed">{product.details}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      {product.details || product.description || 'No details available.'}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Directions */}
               <div className="border-b">
                 <button
                   onClick={() => toggleSection('directions')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
                   <h3 className="text-sm font-semibold">Directions</h3>
-                  <ChevronDown size={16} className={`transform transition-transform duration-300 ${expandedSections.directions ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform duration-300 ${expandedSections.directions ? 'rotate-180' : ''}`}
+                  />
                 </button>
-                <div className={`transition-all duration-300 ease-in-out ${expandedSections.directions ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div
+                  className={`transition-all duration-300 ease-in-out ${expandedSections.directions ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                >
                   <div className="px-3 pb-2">
-                    <p className="text-xs text-gray-700">{product.directions}</p>
+                    <p className="text-xs text-gray-700">{product.directions || 'No directions available.'}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Ingredients */}
               <div className="border-b">
                 <button
                   onClick={() => toggleSection('ingredients')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
                   <h3 className="text-sm font-semibold">Ingredients</h3>
-                  <ChevronDown size={16} className={`transform transition-transform duration-300 ${expandedSections.ingredients ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform duration-300 ${expandedSections.ingredients ? 'rotate-180' : ''}`}
+                  />
                 </button>
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.ingredients ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.ingredients ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+                >
                   <div className="px-3 pb-2">
-                    <p className="text-[10px] font-semibold mb-1">Serving Size: One (1) Tablet</p>
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-1 text-[10px]">Each Tablet Contains:</th>
-                          <th className="text-left py-1 text-[10px]">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {product.ingredients.map((ingredient, idx) => (
-                          <tr key={idx} className="border-b">
-                            <td className="py-1 text-[10px]">{ingredient.name}</td>
-                            <td className="py-1 text-[10px]">{ingredient.amount}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    {ingredients.length > 0 ? (
+                      <>
+                        <p className="text-[10px] font-semibold mb-1">Serving Size: One (1) Tablet</p>
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-1 text-[10px]">Each Tablet Contains:</th>
+                              <th className="text-left py-1 text-[10px]">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {ingredients.map((ingredient, idx) => (
+                              <tr key={idx} className="border-b">
+                                <td className="py-1 text-[10px]">{ingredient.name}</td>
+                                <td className="py-1 text-[10px]">{ingredient.amount}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </>
+                    ) : (
+                      <p className="text-xs text-gray-700">No ingredients listed.</p>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* FAQs */}
               <div className="border-b">
                 <button
                   onClick={() => toggleSection('faqs')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
                   <h3 className="text-sm font-semibold">FAQs</h3>
-                  <ChevronDown size={16} className={`transform transition-transform duration-300 ${expandedSections.faqs ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform duration-300 ${expandedSections.faqs ? 'rotate-180' : ''}`}
+                  />
                 </button>
-                <div className={`transition-all duration-300 ease-in-out ${expandedSections.faqs ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div
+                  className={`transition-all duration-300 ease-in-out ${expandedSections.faqs ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                >
                   <div className="px-3 pb-2">
                     <p className="text-xs text-gray-700">Frequently asked questions content goes here...</p>
                   </div>
                 </div>
               </div>
 
-              {/* Customer Reviews */}
               <div>
                 <button
                   onClick={() => toggleSection('reviews')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
                   <h3 className="text-sm font-semibold">Customer Reviews</h3>
-                  <ChevronDown size={16} className={`transform transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`}
+                  />
                 </button>
-                <div className={`transition-all duration-300 ease-in-out ${expandedSections.reviews ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div
+                  className={`transition-all duration-300 ease-in-out ${expandedSections.reviews ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                >
                   <div className="px-3 pb-2">
                     <p className="text-xs text-gray-700">Customer reviews will appear here...</p>
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* Certifications */}
-        
           </div>
         </div>
-
-
-        {/* You May Also Like */}
-        {/* <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-xl font-bold mb-4">YOU MAY ALSO LIKE</h2>
-          <div className="relative">
-            <div 
-              ref={relatedScrollRef}
-              className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
-            >
-              {relatedProducts.map((prod) => (
-                <Link 
-                  key={prod.id} 
-                  to={`/product/${prod.id}`}
-                  className="min-w-[200px] bg-gray-50 rounded-lg p-3 hover:shadow-lg transition-shadow flex-shrink-0 block"
-                >
-                  <div className="h-40 flex items-center justify-center mb-3 relative">
-                    <img src={prod.image} alt={prod.name} className="max-h-full object-contain" />
-                    {prod.originalPrice && prod.discountedPrice && prod.originalPrice > prod.discountedPrice && (
-                      <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded font-bold">
-                        -15%
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-sm font-semibold mb-2 line-clamp-2">{prod.name}</h3>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-base font-bold text-biomed-teal">Rs. {prod.discountedPrice}</span>
-                  </div>
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      addToCart(prod);
-                    }}
-                    className="w-full bg-biomed-navy hover:bg-biomed-navy/90 text-white py-1.5 rounded text-xs font-semibold"
-                  >
-                    Add to Cart
-                  </button>
-                </Link>
-              ))}
-            </div>
-            <button 
-              onClick={scrollRelatedLeft}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-1.5 hover:bg-gray-100 transition-colors z-10"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button 
-              onClick={scrollRelatedRight}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-1.5 hover:bg-gray-100 transition-colors z-10"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </div> */}
       </div>
     </div>
   );
 };
 
 export default ProductDetailPage;
-

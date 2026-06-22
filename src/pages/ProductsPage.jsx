@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, ShoppingCart, Grid, List } from 'lucide-react';
+import { Star, ShoppingCart, Grid, List, Loader2 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
 import { fetchProducts } from '../api';
@@ -13,6 +13,7 @@ const ProductsPage = ({ addToCart, variant }) => {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sortBy, setSortBy] = useState('bestselling');
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
 
   useEffect(() => {
@@ -22,6 +23,7 @@ const ProductsPage = ({ addToCart, variant }) => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      setLoading(true);
       try {
         const data = await fetchProducts();
         if (!cancelled) {
@@ -33,6 +35,8 @@ const ProductsPage = ({ addToCart, variant }) => {
           setProductsError(err.message || 'Failed to load products');
           setProducts([]);
         }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
@@ -41,142 +45,6 @@ const ProductsPage = ({ addToCart, variant }) => {
   }, []);
 
   const categories = PRODUCT_NAV_CATEGORIES;
-
-  const staticProducts = [
-    {
-      id: 'prod-1',
-      name: 'Magioo Magnesium Glycinate (1000mg)',
-      rating: 4.8,
-      reviews: 178,
-      originalPrice: 2390,
-      discountedPrice: 2390,
-      image: '/assets/new-products/product-1.jpeg',
-      description: 'Magioo Magnesium Glycinate is a dietary supplement tablet containing 1000 mg of Magnesium Glycinate (USP) per serving. Supports sleep, helps nerve and muscle function, promotes bone & heart health, and enhances nutrient absorption.',
-      inStock: true,
-      category: 'Best Selling'
-    },
-    {
-      id: 'prod-2',
-      name: 'Tablet Ostical-D 30s',
-      rating: 4.6,
-      reviews: 95,
-      originalPrice: 1120,
-      discountedPrice: 1120,
-      image: '/assets/new-products/product-2.jpeg',
-      description: 'Ostical-D Tablets are a bone health supplement manufactured by Biomed Innovation Pharmaceuticals. The product is formulated with Calcium Carbonate, Magnesium, Zinc, Vitamin D3, and Vitamin K, designed to help remove joint pain and support the development of healthy bones & teeth, while also supporting the maintenance of strong bones.',
-      inStock: true,
-      category: 'Bones & Joints'
-    },
-    {
-      id: 'prod-3',
-      name: 'Tablet Zincoo 50mg',
-      rating: 4.7,
-      reviews: 142,
-      originalPrice: 950,
-      discountedPrice: 950,
-      image: '/assets/new-products/product-3.jpeg',
-      description: 'Zincoo ZINC is a high-quality zinc supplement formulated with Zinc Gluconate 50mg per serving. It supports immune function, promotes skin health, and aids in cell growth. The product is manufactured by Biomed, emphasizing natural ingredients for optimal absorption.',
-      inStock: true,
-      category: ['Fertility Support', 'Digestive Health', 'Immune Support', "Men's Health"]
-    },
-    {
-      id: 'prod-4',
-      name: 'Glutamed capsule 30s',
-      rating: 4.9,
-      reviews: 203,
-      originalPrice: 4300,
-      discountedPrice: 4300,
-      image: '/assets/new-products/product-4.jpeg',
-      description: 'Glutamed L-Glutathione with Vitamin C is a dietary supplement manufactured by Biomed Innovation Pharmaceuticals Pvt Ltd. The product is packaged in a bottle of 30 capsules and is promoted for skin benefits, including skin lightening, detoxification, and anti-aging effects.',
-      inStock: true,
-      category: ['Beauty', 'Glutathione']
-    },
-    {
-      id: 'prod-5',
-      name: 'Bemega (Omega-3 500mg) Capsule – BioMed Innovation',
-      rating: 4.8,
-      reviews: 167,
-      originalPrice: 1590,
-      discountedPrice: 1590,
-      image: '/assets/new-products/product-5.jpeg',
-      description: 'Bomega Omega-3 500mg is a premium dietary supplement marketed by BioMed Innovation Pharmaceuticals (Pvt) Ltd. Each bottle contains 30 softgel capsules, providing 500mg of high-quality Omega-3 fish oil per capsule. Supports heart health, brain function, and joint support.',
-      inStock: true,
-      category: ['Fish Oil', 'Heart Health', 'Memory & Brain Support']
-    },
-    {
-      id: 'prod-6',
-      name: 'Bio-12 Tablets (Mecobalamin 2000mcg)',
-      rating: 4.7,
-      reviews: 128,
-      originalPrice: 1420,
-      discountedPrice: 1420,
-      image: '/assets/new-products/product-6.jpeg',
-      description: 'Bio-12 is a dietary supplement in tablet form containing Mecobalamin 2000mcg, a form of Vitamin B12. It supports nerve health, energy metabolism, and red blood cell production. The product is marketed by Biomed Pharmaceuticals and is promoted for nervous system maintenance and increased body energy.',
-      inStock: true,
-      category: 'B Vitamins'
-    },
-    {
-      id: 'prod-8',
-      name: 'NORO tablet 20s',
-      rating: 4.6,
-      reviews: 112,
-      originalPrice: 1400,
-      discountedPrice: 1400,
-      image: '/assets/new-products/product-8.jpeg',
-      description: 'Noro tablets are a nutraceutical dietary supplement marketed by Biomed Innovation Pharmaceuticals Pvt Ltd. Each tablet contains Calcium L-5-Methyltetrahydrofolate (490 mcg), Vitamin B6 (1.3 mg), and Vitamin B12 (1 mcg). The product is designed to support cognitive function, healthy red blood cell formation, and boost energy levels.',
-      inStock: true,
-      category: 'Blood Sugar Support'
-    },
-    {
-      id: 'prod-11',
-      name: 'Teenur tablet 30s',
-      rating: 4.6,
-      reviews: 112,
-      originalPrice: 1590,
-      discountedPrice: 1590,
-      image: '/assets/new-products/product-11.jpeg',
-      description: 'Biotin + Keratin is a dietary supplement tablet containing Biotin 2500mcg and Hydrolyzed Keratin 250mg. It is designed for adult men and supports hair growth, nail health, skin health, and overall wellness.',
-      inStock: true,
-      category: ['Beauty', 'Hair Care']
-    },
-    {
-      id: 'prod-12',
-      name: 'X‑NUR 30s tablet',
-      rating: 4.8,
-      reviews: 189,
-      originalPrice: 2990,
-      discountedPrice: 2990,
-      image: '/assets/new-products/product-12.jpeg',
-      description: 'X‑NUR herbal supplement tablets by Biomed Innovation Pharmaceuticals. Benefits include boosting testosterone, enhancing muscle strength & performance, supporting mental health & stamina, and increasing energy levels.',
-      inStock: true,
-      category: ['Fertility Support', "Men's Health"]
-    },
-    {
-      id: 'prod-13',
-      name: 'Ostical-D Syrup',
-      rating: 4.6,
-      reviews: 95,
-      originalPrice: 780,
-      discountedPrice: 780,
-      image: '/assets/new-products/product-13.jpeg',
-      description: 'Ostical-D Syrup is a bone health supplement by Biomed Innovation Pharmaceuticals. It contains Calcium Carbonate, Magnesium, Zinc, Vitamin D3, and Vitamin K. The syrup is designed to help remove joint pain and support the development of healthy bones & teeth, while also supporting the maintenance of strong bones.',
-      inStock: true,
-      category: "Children's Health"
-    },
-    {
-      id: 'prod-14',
-      name: 'DeAll softgel Capsules 1s',
-      rating: 4.8,
-      reviews: 98,
-      originalPrice: 435,
-      discountedPrice: 435,
-      image: '/assets/new-products/product-14.jpeg',
-      description: 'DeAll is a premium softgel supplement that combines Vitamin D3 (200,000 IU) with Vitamin K2, formulated by BioMed Innovation Pharmaceuticals Pvt Ltd. This powerful blend supports multiple aspects of health, including immune function, energy & vitality, muscle strength, and bone health.',
-      inStock: true,
-      category: 'Bones & Joints'
-    }
-  ];
-  const effectiveProducts = products.length ? products : staticProducts;
 
   const getCategoryTitle = () => {
     if (isOffers && !category) return 'Offers & Discounts';
@@ -199,22 +67,22 @@ const ProductsPage = ({ addToCart, variant }) => {
 
   // Filter products based on selected category (offers page: all when no category, else by category)
   const filteredProducts = React.useMemo(() => {
-    if (!category || category === 'all-products') return effectiveProducts;
+    if (!category || category === 'all-products') return products;
     
     const selectedCategory = categories.find(cat => 
       normalizeCategoryName(cat) === category
     );
     
-    if (!selectedCategory) return effectiveProducts;
+    if (!selectedCategory) return products;
     
-    return effectiveProducts.filter(product => {
+    return products.filter(product => {
       if (!product.category) return false;
       if (Array.isArray(product.category)) {
         return product.category.includes(selectedCategory);
       }
       return product.category === selectedCategory;
     });
-  }, [category, effectiveProducts]);
+  }, [category, products]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -253,7 +121,7 @@ const ProductsPage = ({ addToCart, variant }) => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {productsError && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
-            {productsError}. Showing fallback product list.
+            {productsError}
           </div>
         )}
         <div className="grid md:grid-cols-4 gap-8">
@@ -376,7 +244,12 @@ const ProductsPage = ({ addToCart, variant }) => {
 
             {/* Products Grid */}
             <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid-cols-1 gap-4'}`}>
-              {filteredProducts.length === 0 ? (
+              {loading ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-24">
+                  <Loader2 className="w-10 h-10 text-biomed-teal animate-spin mb-4" />
+                  <p className="text-gray-500 text-lg">Loading products…</p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <p className="text-gray-500 text-lg">No products found in this category.</p>
                 </div>
