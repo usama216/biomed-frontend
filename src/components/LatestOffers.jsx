@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
 import { fetchProducts } from '../api';
+import { productInOfferSection } from '../constants/productCategories';
 
 const LatestOffers = ({ addToCart }) => {
   const scrollContainerRef = useRef(null);
@@ -127,7 +128,10 @@ const LatestOffers = ({ addToCart }) => {
     (async () => {
       try {
         const data = await fetchProducts();
-        if (!cancelled) setApiOffers(Array.isArray(data) ? data : []);
+        if (!cancelled) {
+          const list = Array.isArray(data) ? data.filter(productInOfferSection) : [];
+          setApiOffers(list);
+        }
       } catch {
         if (!cancelled) setApiOffers([]);
       }

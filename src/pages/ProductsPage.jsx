@@ -3,7 +3,14 @@ import { Star, ShoppingCart, Grid, List, Loader2 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/pricing';
 import { fetchProducts } from '../api';
-import { PRODUCT_NAV_CATEGORIES } from '../constants/productCategories';
+import {
+  PRODUCT_NAV_CATEGORIES,
+  OFFER_NAV_CATEGORIES,
+  OFFER_CATEGORY_OPTIONS,
+  normalizeCategorySlug,
+  productHasCategory,
+  productInOfferSection,
+} from '../constants/productCategories';
 
 const ProductsPage = ({ addToCart, variant }) => {
   const isOffers = variant === 'offers';
@@ -44,15 +51,18 @@ const ProductsPage = ({ addToCart, variant }) => {
     };
   }, []);
 
-  const categories = PRODUCT_NAV_CATEGORIES;
+  const categories = isOffers ? OFFER_NAV_CATEGORIES : PRODUCT_NAV_CATEGORIES;
 
   const getCategoryTitle = () => {
     if (isOffers && !category) return 'Offers & Discounts';
-    if (isOffers && category) return category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    if (isOffers && category) {
+      const match = OFFER_NAV_CATEGORIES.find((cat) => normalizeCategorySlug(cat) === category);
+      if (match) return match;
+    }
     if (!category) return 'All Products';
-    return category.split('-').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    const match = PRODUCT_NAV_CATEGORIES.find((cat) => normalizeCategorySlug(cat) === category);
+    if (match) return match;
+    return category.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   const getHeroSubtitle = () => {
@@ -60,29 +70,29 @@ const ProductsPage = ({ addToCart, variant }) => {
     return "Every day is a new challenge & to keep up you need your daily dose of energy. BIOMED's health care products help you keep energetic, active & ready for any stage of life.";
   };
 
-  // Helper function to normalize category name for comparison
-  const normalizeCategoryName = (catName) => {
-    return catName.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-');
-  };
-
-  // Filter products based on selected category (offers page: all when no category, else by category)
   const filteredProducts = React.useMemo(() => {
+    if (isOffers) {
+      const offerProducts = products.filter(productInOfferSection);
+      if (!category || category === 'all-offers') return offerProducts;
+
+      const selectedCategory = OFFER_CATEGORY_OPTIONS.find(
+        (cat) => normalizeCategorySlug(cat) === category
+      );
+      if (!selectedCategory) return offerProducts;
+
+      return offerProducts.filter((product) => productHasCategory(product, selectedCategory));
+    }
+
     if (!category || category === 'all-products') return products;
-    
-    const selectedCategory = categories.find(cat => 
-      normalizeCategoryName(cat) === category
+
+    const selectedCategory = PRODUCT_NAV_CATEGORIES.find(
+      (cat) => normalizeCategorySlug(cat) === category
     );
-    
-    if (!selectedCategory) return products;
-    
-    return products.filter(product => {
-      if (!product.category) return false;
-      if (Array.isArray(product.category)) {
-        return product.category.includes(selectedCategory);
-      }
-      return product.category === selectedCategory;
-    });
-  }, [category, products]);
+
+    if (!selectedCategory || selectedCategory === 'All Products') return products;
+
+    return products.filter((product) => productHasCategory(product, selectedCategory));
+  }, [category, products, isOffers]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,13 +143,13 @@ const ProductsPage = ({ addToCart, variant }) => {
                 <h3 className="font-bold text-lg mb-4">CATEGORIES</h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {categories.map((cat, idx) => {
-                    const categorySlug = normalizeCategoryName(cat);
-                    const isAllProducts = cat === 'All Products';
-                    const isActive = !category ? isAllProducts : category === categorySlug;
+                    const categorySlug = normalizeCategorySlug(cat);
+                    const isAllLink = cat === 'All Products' || cat === 'All Offers';
+                    const isActive = !category ? isAllLink : category === categorySlug;
                     return (
                       <Link
                         key={idx}
-                        to={isAllProducts ? (isOffers ? '/offers' : '/products') : (isOffers ? `/offers/${categorySlug}` : `/products/${categorySlug}`)}
+                        to={isAllLink ? (isOffers ? '/offers' : '/products') : (isOffers ? `/offers/${categorySlug}` : `/products/${categorySlug}`)}
                         className={`block py-2 px-3 rounded hover:bg-biomed-teal/10 transition-colors ${
                           isActive
                             ? 'bg-biomed-teal/20 font-semibold' 

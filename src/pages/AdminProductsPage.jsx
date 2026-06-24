@@ -644,7 +644,7 @@ export default function AdminProductsPage() {
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Pick one or more — product appears under each selected category on the shop.
+                    Pick one or more — product appears under each selected category on Products and Offers pages.
                   </p>
                 </div>
 
