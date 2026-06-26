@@ -1,5 +1,5 @@
 import React from 'react';
-import { Facebook, Instagram, Youtube, Twitter, MapPin, Phone, Mail } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Linkedin, MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -29,17 +29,35 @@ const Footer = () => {
               </div>
             </div>
             <div className="flex gap-3">
-              <a href="#" className="hover:text-biomed-teal">
+              <a
+                href="https://web.facebook.com/people/BioMed-Innovation-Pharmaceuticals-Pvt-Ltd/61582286841179/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="BioMed on Facebook"
+                className="hover:text-biomed-teal"
+              >
                 <Facebook size={20} />
               </a>
-              <a href="#" className="hover:text-biomed-teal">
+              <a
+                href="https://www.instagram.com/biomedinnovation_"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="BioMed on Instagram"
+                className="hover:text-biomed-teal"
+              >
                 <Instagram size={20} />
               </a>
               <a href="#" className="hover:text-biomed-teal">
                 <Youtube size={20} />
               </a>
-              <a href="#" className="hover:text-biomed-teal">
-                <Twitter size={20} />
+              <a
+                href="https://www.linkedin.com/company/biomed-innovation-pharmaceuticals-pvt-ltd/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="BioMed on LinkedIn"
+                className="hover:text-biomed-teal"
+              >
+                <Linkedin size={20} />
               </a>
             </div>
           </div>
