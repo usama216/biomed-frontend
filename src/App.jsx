@@ -29,6 +29,9 @@ function AppContent() {
       page_path: location.pathname + location.search,
       page_title: document.title,
     });
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'PageView');
+    }
   }, [location.pathname, location.search]);
 
   const addToCart = (product, openSidebar = true) => {
