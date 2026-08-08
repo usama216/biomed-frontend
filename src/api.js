@@ -436,3 +436,78 @@ export async function deleteProduct(id) {
   }
   return res.json();
 }
+
+// --- Product Reviews ---
+
+export async function fetchProductReviews(productId) {
+  const res = await fetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/reviews`);
+  if (!res.ok) throw new Error('Failed to load reviews');
+  return res.json();
+}
+
+export async function submitProductReview(productId, { author_name, author_email, rating, body }) {
+  const res = await fetch(`${API_BASE}/api/products/${encodeURIComponent(productId)}/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ author_name, author_email, rating, body }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to submit review');
+  }
+  return res.json();
+}
+
+export async function fetchAdminReviews() {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/reviews`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) throw new Error('Failed to load reviews');
+  return res.json();
+}
+
+export async function updateAdminReview(id, { approved }) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/reviews/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ approved }),
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to update review');
+  }
+  return res.json();
+}
+
+export async function deleteAdminReview(id) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/reviews/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to delete review');
+  }
+  return res.json();
+}

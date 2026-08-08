@@ -57,6 +57,16 @@ function parseIngredientsText(text) {
     });
 }
 
+function normalizeFaqs(faqs) {
+  if (!Array.isArray(faqs)) return [];
+  return faqs
+    .map((item) => ({
+      question: String(item?.question || '').trim(),
+      answer: String(item?.answer || '').trim(),
+    }))
+    .filter((item) => item.question && item.answer);
+}
+
 function buildImagesForApi(mainImageUrl, galleryImageUrls) {
   const main = String(mainImageUrl || '').trim();
   const gallery = (galleryImageUrls || []).map((u) => String(u || '').trim()).filter(Boolean);
@@ -107,6 +117,7 @@ export default function AdminProductsPage() {
     details: '',
     directions: '',
     ingredientsText: '',
+    faqs: [],
   });
 
   const loadProducts = async () => {
@@ -150,6 +161,7 @@ export default function AdminProductsPage() {
       details: '',
       directions: '',
       ingredientsText: '',
+      faqs: [],
     });
     setFormOpen(true);
     setError('');
@@ -186,6 +198,12 @@ export default function AdminProductsPage() {
       details: p.details || '',
       directions: p.directions || '',
       ingredientsText: ingredientsToText(p.ingredients ?? []),
+      faqs: Array.isArray(p.faqs)
+        ? p.faqs.map((f) => ({
+            question: String(f?.question || ''),
+            answer: String(f?.answer || ''),
+          }))
+        : [],
     });
     setFormOpen(true);
     setError('');
@@ -200,6 +218,28 @@ export default function AdminProductsPage() {
   const updateField = (key) => (e) => {
     const value = e?.target?.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [key]: value }));
+  };
+
+  const addFaqRow = () => {
+    setForm((f) => ({
+      ...f,
+      faqs: [...(f.faqs || []), { question: '', answer: '' }],
+    }));
+  };
+
+  const updateFaqRow = (index, key, value) => {
+    setForm((f) => {
+      const faqs = [...(f.faqs || [])];
+      faqs[index] = { ...faqs[index], [key]: value };
+      return { ...f, faqs };
+    });
+  };
+
+  const removeFaqRow = (index) => {
+    setForm((f) => ({
+      ...f,
+      faqs: (f.faqs || []).filter((_, i) => i !== index),
+    }));
   };
 
   const toggleCategory = (label) => {
@@ -322,6 +362,7 @@ export default function AdminProductsPage() {
     try {
       const category = mergeCategoriesForSubmit(form.categorySelections, form.orphanCategories);
       const ingredients = parseIngredientsText(form.ingredientsText);
+      const faqs = normalizeFaqs(form.faqs);
       const payload = {
         id: form.id.trim(),
         name: form.name.trim(),
@@ -337,6 +378,7 @@ export default function AdminProductsPage() {
         details: form.details || '',
         directions: form.directions || '',
         ingredients,
+        faqs,
         images: buildImagesForApi(form.mainImageUrl, form.galleryImageUrls),
       };
 
@@ -816,6 +858,57 @@ export default function AdminProductsPage() {
                   />
                   <p className="text-xs text-gray-500 mt-1">Format: Name | Amount (e.g., Vitamin D3 | 200,000 IU)</p>
                 </div>
+
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <label className="block text-sm font-medium text-gray-700">FAQs</label>
+                    <button
+                      type="button"
+                      onClick={addFaqRow}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-biomed-teal hover:text-biomed-navy"
+                    >
+                      <Plus size={16} />
+                      Add FAQ
+                    </button>
+                  </div>
+                  {(form.faqs || []).length === 0 ? (
+                    <p className="text-sm text-gray-500 border border-dashed rounded-lg px-3 py-4">
+                      No FAQs yet. Click “Add FAQ” to add question & answer for this product.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {(form.faqs || []).map((faq, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">FAQ {index + 1}</p>
+                            <button
+                              type="button"
+                              onClick={() => removeFaqRow(index)}
+                              className="text-red-600 hover:text-red-700 text-sm font-medium inline-flex items-center gap-1"
+                            >
+                              <Trash2 size={14} />
+                              Remove
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            value={faq.question}
+                            onChange={(e) => updateFaqRow(index, 'question', e.target.value)}
+                            placeholder="Question"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-biomed-teal focus:border-transparent bg-white"
+                          />
+                          <textarea
+                            value={faq.answer}
+                            onChange={(e) => updateFaqRow(index, 'answer', e.target.value)}
+                            placeholder="Answer"
+                            rows={3}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-biomed-teal focus:border-transparent bg-white"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3 mt-6">
@@ -905,6 +998,19 @@ export default function AdminProductsPage() {
                     <ul className="mt-1 space-y-1">
                       {viewProduct.ingredients.map((ing, i) => (
                         <li key={i}>- {ing.name || 'Ingredient'}{ing.amount ? ` | ${ing.amount}` : ''}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {Array.isArray(viewProduct.faqs) && viewProduct.faqs.length > 0 && (
+                  <div>
+                    <strong>FAQs:</strong>
+                    <ul className="mt-1 space-y-2">
+                      {viewProduct.faqs.map((faq, i) => (
+                        <li key={i}>
+                          <p className="font-medium">Q: {faq.question}</p>
+                          <p className="text-gray-600">A: {faq.answer}</p>
+                        </li>
                       ))}
                     </ul>
                   </div>

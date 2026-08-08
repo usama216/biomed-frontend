@@ -7,6 +7,14 @@ const Certifications = () => {
     '/assets/certificates/certificate-2.png',
     '/assets/certificates/certificate-3.png',
     '/assets/certificates/certificate-4.png',
+    '/assets/certificates/certificate-5.jpeg',
+    '/assets/certificates/certificate-6.jpeg',
+    '/assets/certificates/certificate-7.jpeg',
+    '/assets/certificates/certificate-8.jpeg',
+    '/assets/certificates/certificate-9.jpeg',
+    '/assets/certificates/certificate-10.jpeg',
+    '/assets/certificates/certificate-11.jpeg',
+    '/assets/certificates/certificate-12.jpeg',
   ];
 
   // Duplicate certificates to create 20+ items for smooth marquee

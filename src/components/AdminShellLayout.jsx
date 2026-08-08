@@ -5,6 +5,7 @@ import {
   Package,
   Image,
   FileText,
+  MessageSquare,
   LogOut,
   ExternalLink,
 } from 'lucide-react';
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/banners', label: 'Banners', icon: Image },
   { to: '/admin/blogs', label: 'Blogs', icon: FileText },
+  { to: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
 ];
 
 function navClassName(isActive) {

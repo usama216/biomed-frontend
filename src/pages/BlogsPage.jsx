@@ -55,8 +55,31 @@ const BlogsPage = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Wellness Blog</h1>
-        <p className="text-gray-600">Health tips, wellness advice, and updates from BioMed</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Health Blog</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Stay informed with expert health insights, wellness tips, nutritional guidance, and healthcare updates from BIOMED Innovation Pharmaceuticals.
+        </p>
+        <ul className="mt-6 flex flex-wrap justify-center gap-2 text-sm text-gray-600">
+          {[
+            'Nutrition and wellness',
+            'Immune health support',
+            'Brain and spine health',
+            'Vitamins and supplements',
+            'Preventive healthcare',
+            'Lifestyle and fitness',
+            'Healthcare awareness',
+          ].map((topic) => (
+            <li
+              key={topic}
+              className="bg-biomed-teal/10 text-biomed-navy px-3 py-1 rounded-full font-medium"
+            >
+              {topic}
+            </li>
+          ))}
+        </ul>
+        <p className="text-sm text-gray-500 mt-4 max-w-xl mx-auto">
+          Explore evidence-based health information designed to help you make informed decisions about your wellbeing.
+        </p>
       </div>
 
       {blogs.length === 0 ? (

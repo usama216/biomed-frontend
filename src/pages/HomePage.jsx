@@ -8,6 +8,9 @@ import Mission from '../components/Mission';
 import Science from '../components/Science';
 import LatestOffers from '../components/LatestOffers';
 import WorldwideFootprint from '../components/WorldwideFootprint';
+import BlogCarousel from '../components/BlogCarousel';
+import ProductGridSection from '../components/ProductGridSection';
+import { OFFER_CATEGORY_OPTIONS } from '../constants/productCategories';
 
 const HomePage = ({ addToCart }) => {
   useEffect(() => {
@@ -20,6 +23,18 @@ const HomePage = ({ addToCart }) => {
       <Certifications />
       {/* <HealthCategories /> */}
       <TrendingProducts addToCart={addToCart} />
+      <ProductGridSection
+        addToCart={addToCart}
+        title="BEST SELLING"
+        categories={['Best Selling']}
+        viewMoreLink="/products"
+      />
+      <ProductGridSection
+        addToCart={addToCart}
+        title="OFFERS & BUNDLES"
+        categories={OFFER_CATEGORY_OPTIONS}
+        viewMoreLink="/offers"
+      />
       
       {/* Video Section */}
       <section className="py-6 bg-white">
@@ -42,6 +57,7 @@ const HomePage = ({ addToCart }) => {
       
       {/* <HealthConcerns /> */}
       <Mission />
+      <BlogCarousel />
       {/* <Science /> */}
       {/* <LatestOffers addToCart={addToCart} /> */}
       {/* <WorldwideFootprint /> */}

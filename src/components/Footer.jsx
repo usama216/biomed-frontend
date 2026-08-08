@@ -1,5 +1,6 @@
 import React from 'react';
-import { Facebook, Instagram, Youtube, Linkedin, MapPin, Phone, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Facebook, Instagram, Linkedin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -9,9 +10,9 @@ const Footer = () => {
           {/* Company Info */}
           <div className="md:col-span-1">
             <div className="mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg inline-block">
-              <img 
-                src="/assets/Biomed.png" 
-                alt="BIOMED Logo" 
+              <img
+                src="/assets/Biomed.png"
+                alt="BIOMED Logo"
                 className="h-16 w-auto object-contain"
               />
             </div>
@@ -47,9 +48,6 @@ const Footer = () => {
               >
                 <Instagram size={20} />
               </a>
-              <a href="#" className="hover:text-biomed-teal">
-                <Youtube size={20} />
-              </a>
               <a
                 href="https://www.linkedin.com/company/biomed-innovation-pharmaceuticals-pvt-ltd/"
                 target="_blank"
@@ -66,11 +64,11 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">BIOMED</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white">About Us</a></li>
-              <li><a href="#" className="hover:text-white">Health Blog</a></li>
-              <li><a href="#" className="hover:text-white">Careers</a></li>
-              <li><a href="#" className="hover:text-white">Notifications</a></li>
-              <li><a href="#" className="hover:text-white">Contact Us</a></li>
+              <li><Link to="/about" className="hover:text-white">About Us</Link></li>
+              <li><Link to="/blogs" className="hover:text-white">Health Blog</Link></li>
+              <li><Link to="/careers" className="hover:text-white">Careers</Link></li>
+              <li><Link to="/notifications" className="hover:text-white">Notifications</Link></li>
+              <li><Link to="/contact" className="hover:text-white">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -78,11 +76,9 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">SHOP</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white">All Products</a></li>
-              <li><a href="#" className="hover:text-white">Best Selling</a></li>
-              <li><a href="#" className="hover:text-white">New Arrivals</a></li>
-              <li><a href="#" className="hover:text-white">Offers</a></li>
-              <li><a href="#" className="hover:text-white">Track Your Order</a></li>
+              <li><Link to="/products" className="hover:text-white">All Products</Link></li>
+              <li><Link to="/products/best-selling" className="hover:text-white">Best Selling</Link></li>
+              <li><Link to="/offers" className="hover:text-white">Offers</Link></li>
             </ul>
           </div>
 
@@ -90,10 +86,10 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">BUSINESS</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white">International</a></li>
-              <li><a href="#" className="hover:text-white">Quality & Safety</a></li>
-              <li><a href="#" className="hover:text-white">Become A Distributor</a></li>
-              <li><a href="#" className="hover:text-white">Store Locator</a></li>
+              <li><Link to="/international" className="hover:text-white">International</Link></li>
+              <li><Link to="/quality-safety" className="hover:text-white">Quality & Safety</Link></li>
+              <li><Link to="/become-a-distributor" className="hover:text-white">Become A Distributor</Link></li>
+              <li><Link to="/store-locator" className="hover:text-white">Store Locator</Link></li>
             </ul>
           </div>
 
@@ -119,11 +115,11 @@ const Footer = () => {
         {/* Help & Terms */}
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-wrap gap-6 text-sm text-gray-400 mb-4">
-            <a href="#" className="hover:text-white">Shipping Policy</a>
-            <a href="#" className="hover:text-white">Disclaimers</a>
-            <a href="#" className="hover:text-white">Return & Refund</a>
-            <a href="#" className="hover:text-white">Terms of Service</a>
-            <a href="#" className="hover:text-white">Privacy Policy</a>
+            <Link to="/shipping-policy" className="hover:text-white">Shipping Policy</Link>
+            <Link to="/disclaimers" className="hover:text-white">Disclaimers</Link>
+            <Link to="/return-refund" className="hover:text-white">Return & Refund</Link>
+            <Link to="/terms-of-service" className="hover:text-white">Terms of Service</Link>
+            <Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
           </div>
         </div>
 
@@ -139,4 +135,3 @@ const Footer = () => {
 };
 
 export default Footer;
-

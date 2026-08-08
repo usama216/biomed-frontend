@@ -14,6 +14,17 @@ import ContactPage from './pages/ContactPage';
 import OffersPage from './pages/OffersPage';
 import BlogsPage from './pages/BlogsPage';
 import BlogDetailPage from './pages/BlogDetailPage';
+import ShippingPolicyPage from './pages/ShippingPolicyPage';
+import DisclaimerPage from './pages/DisclaimerPage';
+import ReturnRefundPage from './pages/ReturnRefundPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import CareersPage from './pages/CareersPage';
+import NotificationsPage from './pages/NotificationsPage';
+import InternationalPage from './pages/InternationalPage';
+import QualitySafetyPage from './pages/QualitySafetyPage';
+import BecomeDistributorPage from './pages/BecomeDistributorPage';
+import StoreLocatorPage from './pages/StoreLocatorPage';
 import AdminLayout from './components/AdminLayout';
 
 function AppContent() {
@@ -82,6 +93,17 @@ function AppContent() {
           <Route path="/blogs/:idOrSlug" element={<BlogDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+          <Route path="/disclaimers" element={<DisclaimerPage />} />
+          <Route path="/return-refund" element={<ReturnRefundPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/international" element={<InternationalPage />} />
+          <Route path="/quality-safety" element={<QualitySafetyPage />} />
+          <Route path="/become-a-distributor" element={<BecomeDistributorPage />} />
+          <Route path="/store-locator" element={<StoreLocatorPage />} />
           <Route path="/admin/*" element={<AdminLayout />} />
         </Routes>
         {!isAdmin && (

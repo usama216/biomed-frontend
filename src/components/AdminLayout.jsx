@@ -6,6 +6,7 @@ import AdminDashboardPage from '../pages/AdminDashboardPage';
 import AdminProductsPage from '../pages/AdminProductsPage';
 import AdminBannersPage from '../pages/AdminBannersPage';
 import AdminBlogsPage from '../pages/AdminBlogsPage';
+import AdminReviewsPage from '../pages/AdminReviewsPage';
 import { isAdminLoggedIn } from '../api';
 
 function ProtectedAdminShell() {
@@ -24,6 +25,7 @@ export default function AdminLayout() {
         <Route path="products" element={<AdminProductsPage />} />
         <Route path="banners" element={<AdminBannersPage />} />
         <Route path="blogs" element={<AdminBlogsPage />} />
+        <Route path="reviews" element={<AdminReviewsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>

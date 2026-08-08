@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, ShoppingCart, Grid, List, Loader2 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
-import { getDiscountedPrice } from '../utils/pricing';
+import { getProductPrice, productHasUiDiscount } from '../utils/pricing';
 import { fetchProducts } from '../api';
 import {
   PRODUCT_NAV_CATEGORIES,
@@ -278,7 +278,7 @@ const ProductsPage = ({ addToCart, variant }) => {
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    {product.inStock && (
+                    {product.inStock && productHasUiDiscount(product) && (
                       <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                         -15%
                       </div>
@@ -309,8 +309,10 @@ const ProductsPage = ({ addToCart, variant }) => {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
 
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-gray-500 line-through text-sm">Rs. {product.originalPrice}</span>
-                      <span className="text-xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice)}</span>
+                      {productHasUiDiscount(product) && (
+                        <span className="text-gray-500 line-through text-sm">Rs. {product.originalPrice}</span>
+                      )}
+                      <span className="text-xl font-bold text-biomed-teal">Rs. {getProductPrice(product)}</span>
                     </div>
 
                     <div className="flex gap-2">
@@ -320,7 +322,7 @@ const ProductsPage = ({ addToCart, variant }) => {
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          addToCart({ ...product, discountedPrice: getDiscountedPrice(product.originalPrice) });
+                          addToCart({ ...product, discountedPrice: getProductPrice(product) });
                         }}
                         disabled={!product.inStock}
                         className={`p-2 rounded ${

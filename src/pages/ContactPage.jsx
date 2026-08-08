@@ -51,7 +51,7 @@ const ContactPage = () => {
               <h1 className="text-2xl font-semibold text-gray-900 mb-2">DO YOU HAVE QUESTIONS?</h1>
               <h2 className="text-5xl font-bold text-biomed-navy mb-6">CONTACT US</h2>
               <p className="text-gray-700 mb-8 leading-relaxed">
-                If you have any queries or suggestions, you can call, email, or send us a message through the following form.
+                Get in touch with BIOMED Innovation Pharmaceuticals (Pvt.) Ltd. We are committed to responding to customer inquiries and providing quality healthcare support.
               </p>
 
               {/* Quick Response Options */}
@@ -159,7 +159,8 @@ const ContactPage = () => {
                   <Phone size={18} className="text-biomed-teal flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-semibold">Call us</p>
-                    <a href="tel:+923180079172" className="hover:text-biomed-teal">+92318 0079172</a>
+                    <a href="tel:+923180079172" className="hover:text-biomed-teal block">+92 318 0079172</a>
+                    <a href="tel:+923354130451" className="hover:text-biomed-teal block mt-1">+92 335 4130451 (Alt.)</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
@@ -184,7 +185,8 @@ const ContactPage = () => {
                   <Phone size={18} className="text-biomed-teal flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-semibold">Call us</p>
-                    <a href="tel:+923180079172" className="hover:text-biomed-teal">+92318 0079172</a>
+                    <a href="tel:+923180079172" className="hover:text-biomed-teal block">+92 318 0079172</a>
+                    <a href="tel:+923354130451" className="hover:text-biomed-teal block mt-1">+92 335 4130451 (Alt.)</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">

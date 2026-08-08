@@ -1,13 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Star, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, ShoppingCart, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getProductPrice, productHasUiDiscount } from '../utils/pricing';
 import { fetchProducts } from '../api';
 import { productHasCategory } from '../constants/productCategories';
 
-const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null }) => {
-  const scrollContainerRef = useRef(null);
-  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+const ProductGridSection = ({ addToCart, title, categories, viewMoreLink }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,56 +27,8 @@ const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null
     };
   }, []);
 
-  const visibleProducts = categories
-    ? products.filter((p) => categories.some((c) => productHasCategory(p, c)))
-    : products;
-
-  const duplicatedProducts =
-    visibleProducts.length > 0 ? [...visibleProducts, ...visibleProducts, ...visibleProducts] : [];
-
-  useEffect(() => {
-    if (!isAutoScrolling || loading || visibleProducts.length === 0) return;
-
-    const interval = setInterval(() => {
-      if (scrollContainerRef.current) {
-        const container = scrollContainerRef.current;
-        const maxScroll = container.scrollWidth / 3;
-
-        if (container.scrollLeft >= maxScroll) {
-          container.scrollLeft = 1;
-        } else {
-          container.scrollBy({
-            left: 1,
-            behavior: 'auto',
-          });
-        }
-      }
-    }, 20);
-
-    return () => clearInterval(interval);
-  }, [isAutoScrolling, loading, visibleProducts.length]);
-
-  const scrollLeft = () => {
-    setIsAutoScrolling(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: -320,
-        behavior: 'smooth',
-      });
-    }
-    setTimeout(() => setIsAutoScrolling(true), 5000);
-  };
-
-  const scrollRight = () => {
-    setIsAutoScrolling(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: 320,
-        behavior: 'smooth',
-      });
-    }
-    setTimeout(() => setIsAutoScrolling(true), 5000);
-  };
+  const filtered = products.filter((p) => categories.some((c) => productHasCategory(p, c)));
+  const visibleProducts = filtered.slice(0, 8);
 
   const handleAddToCart = (product) => {
     addToCart({
@@ -88,8 +38,7 @@ const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null
     });
   };
 
-  // Hide category sections entirely when they have no products.
-  if (categories && !loading && visibleProducts.length === 0) return null;
+  if (!loading && visibleProducts.length === 0) return null;
 
   return (
     <section className="py-16 bg-white">
@@ -103,26 +52,14 @@ const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null
             <Loader2 className="w-10 h-10 text-biomed-teal animate-spin mb-4" />
             <p className="text-gray-500 text-lg">Loading products…</p>
           </div>
-        ) : visibleProducts.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-gray-500 text-lg">No products available right now.</p>
-          </div>
         ) : (
-          <div className="relative overflow-hidden">
-            <div className="hidden md:block absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-            <div className="hidden md:block absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-
-            <div
-              ref={scrollContainerRef}
-              className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide"
-              onMouseEnter={() => setIsAutoScrolling(false)}
-              onMouseLeave={() => setIsAutoScrolling(true)}
-            >
-              {duplicatedProducts.map((product, idx) => (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {visibleProducts.map((product) => (
                 <Link
-                  key={`product-${product.id}-${idx}`}
+                  key={`product-${product.id}`}
                   to={`/product/${product.id}`}
-                  className="w-[280px] min-w-[280px] max-w-[280px] bg-white border rounded-lg p-4 hover:shadow-lg transition-shadow flex-shrink-0 block cursor-pointer"
+                  className="bg-white border rounded-lg p-4 hover:shadow-lg transition-shadow block cursor-pointer"
                 >
                   <div className="h-48 rounded-lg mb-4 flex items-center justify-center bg-gray-50 overflow-hidden relative">
                     {(product.image || product.images?.[0]) ? (
@@ -178,23 +115,20 @@ const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null
                 </Link>
               ))}
             </div>
-            <button
-              onClick={scrollLeft}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100 z-10 transition-all hover:scale-110"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              onClick={scrollRight}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100 z-10 transition-all hover:scale-110"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
+
+            <div className="flex justify-center mt-10">
+              <Link
+                to={viewMoreLink}
+                className="inline-block bg-biomed-teal hover:bg-biomed-navy text-white font-semibold py-3 px-10 rounded-lg transition-colors"
+              >
+                View More
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </section>
   );
 };
 
-export default TrendingProducts;
+export default ProductGridSection;

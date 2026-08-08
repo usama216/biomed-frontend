@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Plus, Minus, ShoppingCart, ChevronDown, Loader2 } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getDiscountedPrice } from '../utils/pricing';
-import { fetchProduct } from '../api';
+import { getProductPrice, productHasUiDiscount } from '../utils/pricing';
+import { fetchProduct, fetchProductReviews, submitProductReview } from '../api';
 
 const ProductDetailPage = ({ addToCart }) => {
   const { id } = useParams();
@@ -12,12 +12,18 @@ const ProductDetailPage = ({ addToCart }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ author_name: '', author_email: '', rating: 0, body: '' });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     details: true,
     directions: true,
     ingredients: true,
     faqs: false,
-    reviews: false,
+    reviews: true,
     quality: false
   });
 
@@ -25,6 +31,9 @@ const ProductDetailPage = ({ addToCart }) => {
     window.scrollTo(0, 0);
     setSelectedImage(0);
     setQuantity(1);
+    setReviewForm({ author_name: '', author_email: '', rating: 0, body: '' });
+    setReviewError('');
+    setReviewSuccess('');
   }, [id]);
 
   useEffect(() => {
@@ -52,11 +61,60 @@ const ProductDetailPage = ({ addToCart }) => {
     };
   }, [id]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!id) return;
+      setReviewsLoading(true);
+      try {
+        const data = await fetchProductReviews(id);
+        if (!cancelled) setReviews(Array.isArray(data.reviews) ? data.reviews : []);
+      } catch {
+        if (!cancelled) setReviews([]);
+      } finally {
+        if (!cancelled) setReviewsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    setReviewError('');
+    setReviewSuccess('');
+    if (!reviewForm.rating || reviewForm.rating < 1) {
+      setReviewError('Please select a rating');
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      await submitProductReview(id, {
+        author_name: reviewForm.author_name,
+        author_email: reviewForm.author_email,
+        rating: reviewForm.rating,
+        body: reviewForm.body,
+      });
+      setReviewSuccess('Thank you! Your review was submitted and will show shortly');
+      setReviewForm({ author_name: '', author_email: '', rating: 0, body: '' });
+    } catch (err) {
+      setReviewError(err.message || 'Failed to submit review');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const formatReviewDate = (d) => {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   if (loading) {
@@ -91,6 +149,7 @@ const ProductDetailPage = ({ addToCart }) => {
   const cartImage = galleryImages[0] || product.image || '';
   const helps = Array.isArray(product.helps) ? product.helps : [];
   const ingredients = Array.isArray(product.ingredients) ? product.ingredients : [];
+  const faqs = Array.isArray(product.faqs) ? product.faqs : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -108,7 +167,7 @@ const ProductDetailPage = ({ addToCart }) => {
                 ) : (
                   <div className="text-gray-400 text-sm">No image available</div>
                 )}
-                {product.inStock && (
+                {product.inStock && productHasUiDiscount(product) && (
                   <div className="absolute top-3 left-3 bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded">
                     -15%
                   </div>
@@ -171,8 +230,10 @@ const ProductDetailPage = ({ addToCart }) => {
             </div>
 
             <div className="mb-4 flex items-center gap-3">
-              <span className="text-gray-500 line-through text-lg">Rs. {product.originalPrice}</span>
-              <span className="text-2xl font-bold text-biomed-teal">Rs. {getDiscountedPrice(product.originalPrice)}</span>
+              {productHasUiDiscount(product) && (
+                <span className="text-gray-500 line-through text-lg">Rs. {product.originalPrice}</span>
+              )}
+              <span className="text-2xl font-bold text-biomed-teal">Rs. {getProductPrice(product)}</span>
             </div>
 
             {helps.length > 0 && (
@@ -226,7 +287,7 @@ const ProductDetailPage = ({ addToCart }) => {
               <p className="text-base font-semibold">
                 Subtotal:{' '}
                 <span className="text-biomed-teal">
-                  Rs. {getDiscountedPrice(product.originalPrice) * quantity}
+                  Rs. {getProductPrice(product) * quantity}
                 </span>
               </p>
             </div>
@@ -237,7 +298,7 @@ const ProductDetailPage = ({ addToCart }) => {
                   addToCart({
                     ...product,
                     quantity,
-                    discountedPrice: getDiscountedPrice(product.originalPrice),
+                    discountedPrice: getProductPrice(product),
                     image: cartImage,
                   })
                 }
@@ -260,7 +321,7 @@ const ProductDetailPage = ({ addToCart }) => {
                     {
                       ...product,
                       quantity,
-                      discountedPrice: getDiscountedPrice(product.originalPrice),
+                      discountedPrice: getProductPrice(product),
                       image: cartImage,
                     },
                     false
@@ -290,7 +351,7 @@ const ProductDetailPage = ({ addToCart }) => {
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${expandedSections.details ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.details ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}
                 >
                   <div className="px-3 pb-2">
                     <p className="text-xs text-gray-700 leading-relaxed">
@@ -312,7 +373,7 @@ const ProductDetailPage = ({ addToCart }) => {
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${expandedSections.directions ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.directions ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
                 >
                   <div className="px-3 pb-2">
                     <p className="text-xs text-gray-700">{product.directions || 'No directions available.'}</p>
@@ -332,7 +393,7 @@ const ProductDetailPage = ({ addToCart }) => {
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.ingredients ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.ingredients ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
                 >
                   <div className="px-3 pb-2">
                     {ingredients.length > 0 ? (
@@ -367,17 +428,28 @@ const ProductDetailPage = ({ addToCart }) => {
                   onClick={() => toggleSection('faqs')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
-                  <h3 className="text-sm font-semibold">FAQs</h3>
+                  <h3 className="text-sm font-semibold">
+                    FAQs{faqs.length > 0 ? ` (${faqs.length})` : ''}
+                  </h3>
                   <ChevronDown
                     size={16}
                     className={`transform transition-transform duration-300 ${expandedSections.faqs ? 'rotate-180' : ''}`}
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${expandedSections.faqs ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.faqs ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}
                 >
-                  <div className="px-3 pb-2">
-                    <p className="text-xs text-gray-700">Frequently asked questions content goes here...</p>
+                  <div className="px-3 pb-2 space-y-3">
+                    {faqs.length === 0 ? (
+                      <p className="text-xs text-gray-500">No FAQs available for this product yet.</p>
+                    ) : (
+                      faqs.map((faq, idx) => (
+                        <div key={idx} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                          <p className="text-xs font-semibold text-gray-900 mb-1">{faq.question}</p>
+                          <p className="text-xs text-gray-700 whitespace-pre-wrap">{faq.answer}</p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -387,17 +459,131 @@ const ProductDetailPage = ({ addToCart }) => {
                   onClick={() => toggleSection('reviews')}
                   className="w-full flex items-center justify-between py-2 px-3 text-left hover:bg-gray-50 transition-colors"
                 >
-                  <h3 className="text-sm font-semibold">Customer Reviews</h3>
+                  <h3 className="text-sm font-semibold">
+                    Customer Reviews{reviews.length > 0 ? ` (${reviews.length})` : ''}
+                  </h3>
                   <ChevronDown
                     size={16}
                     className={`transform transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`}
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${expandedSections.reviews ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedSections.reviews ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}`}
                 >
-                  <div className="px-3 pb-2">
-                    <p className="text-xs text-gray-700">Customer reviews will appear here...</p>
+                  <div className="px-3 pb-3 space-y-4">
+                    {reviewsLoading ? (
+                      <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading reviews…
+                      </div>
+                    ) : reviews.length === 0 ? (
+                      <p className="text-xs text-gray-500">No reviews yet. Be the first to review this product.</p>
+                    ) : (
+                      <ul className="space-y-3">
+                        {reviews.map((review) => (
+                          <li key={review.id} className="border rounded-lg p-3 bg-gray-50">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <p className="text-xs font-semibold text-gray-900">{review.author_name}</p>
+                              <span className="text-[10px] text-gray-400">{formatReviewDate(review.created_at)}</span>
+                            </div>
+                            <div className="flex mb-1.5">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={12}
+                                  className={
+                                    i < Number(review.rating || 0)
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'text-gray-300'
+                                  }
+                                />
+                              ))}
+                            </div>
+                            <p className="text-xs text-gray-700 whitespace-pre-wrap">{review.body}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <form onSubmit={handleReviewSubmit} className="border rounded-lg p-3 bg-white space-y-2.5">
+                      <p className="text-xs font-semibold text-gray-900">Write a review</p>
+                      {reviewError && (
+                        <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded px-2 py-1.5">{reviewError}</p>
+                      )}
+                      {reviewSuccess && (
+                        <p className="text-xs text-green-700 bg-green-50 border border-green-100 rounded px-2 py-1.5">{reviewSuccess}</p>
+                      )}
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-600 mb-1">Your name *</label>
+                        <input
+                          type="text"
+                          required
+                          maxLength={120}
+                          value={reviewForm.author_name}
+                          onChange={(e) => setReviewForm((f) => ({ ...f, author_name: e.target.value }))}
+                          className="w-full border rounded px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-biomed-teal"
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-600 mb-1">Email (optional)</label>
+                        <input
+                          type="email"
+                          maxLength={200}
+                          value={reviewForm.author_email}
+                          onChange={(e) => setReviewForm((f) => ({ ...f, author_email: e.target.value }))}
+                          className="w-full border rounded px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-biomed-teal"
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-600 mb-1">Rating *</label>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setReviewForm((f) => ({ ...f, rating: star }))}
+                                className="p-0.5"
+                                aria-label={`${star} star`}
+                              >
+                                <Star
+                                  size={18}
+                                  className={
+                                    star <= reviewForm.rating
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'text-gray-300'
+                                  }
+                                />
+                              </button>
+                            ))}
+                          </div>
+                          {reviewForm.rating > 0 && (
+                            <span className="text-xs font-semibold text-gray-700">{reviewForm.rating}/5</span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-gray-600 mb-1">Your review *</label>
+                        <textarea
+                          required
+                          maxLength={2000}
+                          rows={3}
+                          value={reviewForm.body}
+                          onChange={(e) => setReviewForm((f) => ({ ...f, body: e.target.value }))}
+                          className="w-full border rounded px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-biomed-teal resize-y"
+                          placeholder="Share your experience with this product…"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={reviewSubmitting}
+                        className="w-full bg-biomed-navy hover:bg-biomed-navy/90 disabled:opacity-60 text-white py-2 rounded-lg text-xs font-semibold"
+                      >
+                        {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
