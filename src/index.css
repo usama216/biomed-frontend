@@ -74,13 +74,15 @@ body {
 /* Slow Marquee for Certificates */
 .animate-marquee-slow {
   display: flex;
-  animation: marquee 10s linear infinite;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+  will-change: transform;
 }
 
-/* Faster speed on mobile */
+/* Slightly faster on mobile, but still slow enough to see all logos */
 @media (max-width: 768px) {
   .animate-marquee-slow {
-    animation: marquee 5s linear infinite;
+    animation: marquee 30s linear infinite;
   }
 }
 

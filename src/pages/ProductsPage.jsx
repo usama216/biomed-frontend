@@ -101,7 +101,7 @@ const ProductsPage = ({ addToCart, variant }) => {
           {/* Offers Hero Image */}
           <section className="relative h-[600px] md:h-[800px] overflow-hidden">
             <img
-              src="/assets/hero-section-banner/banner-image-15.jpeg"
+              src="/assets/hero-section-banner/banner-image-15-1.jpeg"
               alt="Offers & Discounts"
               className="w-full h-full object-cover"
             />

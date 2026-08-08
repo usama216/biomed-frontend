@@ -1,7 +1,6 @@
 import React from 'react';
 
 const Certifications = () => {
-  // Base certificates - 4 unique certificates
   const baseCertificates = [
     '/assets/certificates/certificate-1.png',
     '/assets/certificates/certificate-2.png',
@@ -17,14 +16,19 @@ const Certifications = () => {
     '/assets/certificates/certificate-12.jpeg',
   ];
 
-  // Duplicate certificates to create 20+ items for smooth marquee
-  const certificates = [
-    ...baseCertificates,
-    ...baseCertificates,
-    ...baseCertificates,
-    ...baseCertificates,
-    ...baseCertificates,
-  ];
+  const renderSet = (keyPrefix) =>
+    baseCertificates.map((cert, idx) => (
+      <div key={`${keyPrefix}-${idx}`} className="flex-shrink-0 mx-3 md:mx-4">
+        <div className="w-16 h-16 md:w-24 md:h-24 bg-white rounded-lg flex items-center justify-center shadow-lg p-2 transition-transform hover:scale-110">
+          <img
+            src={cert}
+            alt={`Certificate ${idx + 1}`}
+            className="w-full h-full object-contain"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    ));
 
   return (
     <section className="bg-biomed-navy py-6 md:py-12 overflow-hidden">
@@ -32,35 +36,14 @@ const Certifications = () => {
         <h2 className="text-white text-center text-xl md:text-2xl font-semibold mb-8">
           Certificates From Global Regulatory Authorities
         </h2>
-        
-        {/* Marquee Container */}
-        <div className="relative">
-          {/* Marquee Content - Duplicate for seamless loop */}
-          <div className="flex animate-marquee-slow hover:pause-marquee">
-            {/* First Set */}
-            {certificates.map((cert, idx) => (
-              <div key={`cert-1-${idx}`} className="flex-shrink-0 mx-4">
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-white rounded-lg flex items-center justify-center shadow-lg p-2 transition-transform hover:scale-110">
-                  <img 
-                    src={cert} 
-                    alt={`Certificate ${(idx % 4) + 1}`} 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-            ))}
-            {/* Second Set for seamless loop */}
-            {certificates.map((cert, idx) => (
-              <div key={`cert-2-${idx}`} className="flex-shrink-0 mx-4">
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-white rounded-lg flex items-center justify-center shadow-lg p-2 transition-transform hover:scale-110">
-                  <img 
-                    src={cert} 
-                    alt={`Certificate ${(idx % 4) + 1}`} 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-            ))}
+
+        <div className="relative overflow-hidden">
+          {/* w-max keeps full content width on mobile so -50% marquee covers all logos */}
+          <div className="flex w-max animate-marquee-slow hover:pause-marquee">
+            <div className="flex shrink-0 items-center">{renderSet('a')}</div>
+            <div className="flex shrink-0 items-center" aria-hidden="true">
+              {renderSet('b')}
+            </div>
           </div>
         </div>
       </div>
@@ -69,4 +52,3 @@ const Certifications = () => {
 };
 
 export default Certifications;
-
