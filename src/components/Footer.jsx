@@ -126,7 +126,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-6 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 All Rights Reserved BIOMED Innovation Pharmaceuticals (Pvt) Ltd
+            © 2026 All Rights Reserved BIOMED Innovation Pharmaceuticals (Pvt) Ltd
           </p>
         </div>
       </div>
