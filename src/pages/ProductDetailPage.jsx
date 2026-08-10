@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Plus, Minus, ShoppingCart, ChevronDown, Loader2 } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getProductPrice, productHasUiDiscount } from '../utils/pricing';
+import { getProductPrice, productHasUiDiscount, getProductDiscountPercent } from '../utils/pricing';
 import { fetchProduct, fetchProductReviews, submitProductReview } from '../api';
 
 const ProductDetailPage = ({ addToCart }) => {
@@ -169,7 +169,7 @@ const ProductDetailPage = ({ addToCart }) => {
                 )}
                 {product.inStock && productHasUiDiscount(product) && (
                   <div className="absolute top-3 left-3 bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded">
-                    -15%
+                    -{getProductDiscountPercent(product)}%
                   </div>
                 )}
               </div>

@@ -67,6 +67,23 @@ function normalizeFaqs(faqs) {
     .filter((item) => item.question && item.answer);
 }
 
+/** Reverse-calc % from stored prices for edit form. Empty string = no discount. */
+function percentFromPrices(original, discounted) {
+  const o = Number(original);
+  const d = Number(discounted);
+  if (!Number.isFinite(o) || o <= 0 || !Number.isFinite(d) || d <= 0 || d >= o) return '';
+  return String(Math.round(((o - d) / o) * 100));
+}
+
+/** Apply discount % to original. 0 / empty = no discount. */
+function priceFromPercent(original, percent) {
+  const o = Number(original);
+  const p = Number(percent);
+  if (!Number.isFinite(o) || o < 0) return 0;
+  if (!Number.isFinite(p) || p <= 0) return Math.round(o);
+  return Math.round(o * (1 - Math.min(p, 100) / 100));
+}
+
 function buildImagesForApi(mainImageUrl, galleryImageUrls) {
   const main = String(mainImageUrl || '').trim();
   const gallery = (galleryImageUrls || []).map((u) => String(u || '').trim()).filter(Boolean);
@@ -103,7 +120,7 @@ export default function AdminProductsPage() {
     id: '',
     name: '',
     original_price: '',
-    discounted_price: '',
+    discount_percent: '',
     in_stock: true,
     categorySelections: [...DEFAULT_CATEGORY],
     orphanCategories: [],
@@ -147,7 +164,7 @@ export default function AdminProductsPage() {
       id: '',
       name: '',
       original_price: '',
-      discounted_price: '',
+      discount_percent: '',
       in_stock: true,
       categorySelections: [...DEFAULT_CATEGORY],
       orphanCategories: [],
@@ -175,7 +192,7 @@ export default function AdminProductsPage() {
       id: p.id || '',
       name: p.name || '',
       original_price: p.originalPrice ?? '',
-      discounted_price: p.discountedPrice ?? '',
+      discount_percent: percentFromPrices(p.originalPrice, p.discountedPrice),
       in_stock: p.inStock !== false,
       categorySelections: known.length ? known : [...DEFAULT_CATEGORY],
       orphanCategories: orphans,
@@ -340,8 +357,9 @@ export default function AdminProductsPage() {
       setError('Original price is required.');
       return;
     }
-    if (!String(form.discounted_price).trim() || Number.isNaN(Number(form.discounted_price))) {
-      setError('Discounted price is required.');
+    const discountPercentRaw = String(form.discount_percent ?? '').trim();
+    if (discountPercentRaw !== '' && (Number.isNaN(Number(discountPercentRaw)) || Number(discountPercentRaw) < 0 || Number(discountPercentRaw) > 100)) {
+      setError('Discount % must be between 0 and 100.');
       return;
     }
     if (!editingId && !form.id.trim()) {
@@ -363,11 +381,13 @@ export default function AdminProductsPage() {
       const category = mergeCategoriesForSubmit(form.categorySelections, form.orphanCategories);
       const ingredients = parseIngredientsText(form.ingredientsText);
       const faqs = normalizeFaqs(form.faqs);
+      const originalPrice = Number(form.original_price);
+      const discountedPrice = priceFromPercent(originalPrice, form.discount_percent);
       const payload = {
         id: form.id.trim(),
         name: form.name.trim(),
-        original_price: Number(form.original_price),
-        discounted_price: Number(form.discounted_price),
+        original_price: originalPrice,
+        discounted_price: discountedPrice,
         in_stock: !!form.in_stock,
         category,
         sort_order: parseInt(form.sort_order, 10) || 0,
@@ -499,7 +519,13 @@ export default function AdminProductsPage() {
                         <h3 className="font-semibold text-gray-900 line-clamp-2">{p.name}</h3>
                         <p className="text-sm text-gray-500 mt-1">{p.id}</p>
                         <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-400">
-                          <span>Rs. {p.discountedPrice}</span>
+                          <span>
+                            {Number(p.discountedPrice) > 0 &&
+                            Number(p.originalPrice) > 0 &&
+                            Number(p.discountedPrice) < Number(p.originalPrice)
+                              ? `Rs. ${p.discountedPrice} (−${Math.round(((Number(p.originalPrice) - Number(p.discountedPrice)) / Number(p.originalPrice)) * 100)}%)`
+                              : `Rs. ${p.originalPrice ?? p.discountedPrice}`}
+                          </span>
                           <span>•</span>
                           <span>{p.inStock ? 'In stock' : 'Out of stock'}</span>
                           {Array.isArray(p.category) && p.category.length > 0 ? (
@@ -592,6 +618,8 @@ export default function AdminProductsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Original price (Rs.) *</label>
                     <input
                       type="number"
+                      min="0"
+                      step="1"
                       value={form.original_price}
                       onChange={updateField('original_price')}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
@@ -599,14 +627,29 @@ export default function AdminProductsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Discounted price (Rs.) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Discount (%)</label>
                     <input
                       type="number"
-                      value={form.discounted_price}
-                      onChange={updateField('discounted_price')}
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={form.discount_percent}
+                      onChange={updateField('discount_percent')}
+                      placeholder="e.g. 10 or 15 (0 = no discount)"
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
-                      required
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Leave empty or 0 for no discount.
+                      {form.original_price !== '' && !Number.isNaN(Number(form.original_price)) && (
+                        <>
+                          {' '}
+                          Sell price:{' '}
+                          <span className="font-semibold text-biomed-navy">
+                            Rs. {priceFromPercent(form.original_price, form.discount_percent)}
+                          </span>
+                        </>
+                      )}
+                    </p>
                   </div>
                 </div>
 
