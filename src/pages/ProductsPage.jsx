@@ -99,12 +99,14 @@ const ProductsPage = ({ addToCart, variant }) => {
       {isOffers ? (
         <>
           {/* Offers Hero Image */}
-          <section className="relative h-[600px] md:h-[800px] overflow-hidden">
-            <img
-              src="/assets/hero-section-banner/banner-image-15-1.jpeg"
-              alt="Offers & Discounts"
-              className="w-full h-full object-cover"
-            />
+          <section className="relative w-full overflow-hidden bg-gray-100">
+            <div className="relative w-full aspect-[16/10] sm:aspect-[16/8] md:aspect-[21/9] lg:h-[700px] lg:aspect-auto">
+              <img
+                src="/assets/hero-section-banner/banner-image-15-1.jpeg"
+                alt="Offers & Discounts"
+                className="absolute inset-0 w-full h-full object-cover object-center"
+              />
+            </div>
           </section>
           {/* Offers Description */}
           <section className="py-8 bg-gray-50">
