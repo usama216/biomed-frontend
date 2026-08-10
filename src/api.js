@@ -37,15 +37,32 @@ export async function saveOrder(sessionId) {
   return res.json();
 }
 
-export async function placeCodOrder(items, customer) {
+export async function placeCodOrder(items, customer, promoCode) {
   const res = await fetch(`${API_BASE}/api/orders/cod`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items, customer }),
+    body: JSON.stringify({
+      items,
+      customer,
+      promo_code: promoCode || undefined,
+    }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || 'Failed to place order');
+  }
+  return res.json();
+}
+
+export async function validatePromoCode(code, subtotal) {
+  const res = await fetch(`${API_BASE}/api/promo-codes/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, subtotal }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Invalid promo code');
   }
   return res.json();
 }
@@ -508,6 +525,84 @@ export async function deleteAdminReview(id) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || 'Failed to delete review');
+  }
+  return res.json();
+}
+
+// --- Admin Promo Codes ---
+
+export async function fetchAdminPromoCodes() {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/promo-codes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) throw new Error('Failed to load promo codes');
+  return res.json();
+}
+
+export async function createPromoCode(payload) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/promo-codes`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to create promo code');
+  }
+  return res.json();
+}
+
+export async function updatePromoCode(id, payload) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/promo-codes/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to update promo code');
+  }
+  return res.json();
+}
+
+export async function deletePromoCode(id) {
+  const token = getAdminToken();
+  if (!token) throw new Error('Not logged in');
+  const res = await fetch(`${API_BASE}/api/admin/promo-codes/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401 || res.status === 403) {
+    adminLogout();
+    throw new Error('Session expired');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Failed to delete promo code');
   }
   return res.json();
 }

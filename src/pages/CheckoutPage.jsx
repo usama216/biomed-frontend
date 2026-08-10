@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Loader2, ArrowLeft, User, Mail, Phone, MapPin, FileText, Banknote } from 'lucide-react';
-import { placeCodOrder } from '../api';
+import { ShoppingBag, Loader2, ArrowLeft, User, Mail, Phone, MapPin, FileText, Banknote, Tag } from 'lucide-react';
+import { placeCodOrder, validatePromoCode } from '../api';
 
 const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
   const navigate = useNavigate();
@@ -16,8 +16,45 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [promoInput, setPromoInput] = useState('');
+  const [promoApplying, setPromoApplying] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.discountedPrice ?? item.price ?? item.originalPrice ?? 0) * (item.quantity || 1), 0);
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + (item.discountedPrice ?? item.price ?? item.originalPrice ?? 0) * (item.quantity || 1),
+    0
+  );
+  const promoDiscount = appliedPromo?.discount ?? 0;
+  const total = Math.max(0, subtotal - promoDiscount);
+
+  useEffect(() => {
+    // Re-validate promo if cart subtotal changes
+    if (!appliedPromo?.code) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await validatePromoCode(appliedPromo.code, subtotal);
+        if (!cancelled) {
+          setAppliedPromo({
+            code: data.code,
+            discount: data.discount,
+            discount_type: data.discount_type,
+            discount_value: data.discount_value,
+          });
+          setPromoError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setAppliedPromo(null);
+          setPromoError(err.message || 'Promo code no longer valid for this cart');
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [subtotal]);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -43,6 +80,37 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
     };
   };
 
+  const handleApplyPromo = async (e) => {
+    e.preventDefault();
+    setPromoError('');
+    if (!promoInput.trim()) {
+      setPromoError('Enter a promo code');
+      return;
+    }
+    setPromoApplying(true);
+    try {
+      const data = await validatePromoCode(promoInput.trim(), subtotal);
+      setAppliedPromo({
+        code: data.code,
+        discount: data.discount,
+        discount_type: data.discount_type,
+        discount_value: data.discount_value,
+      });
+      setPromoInput(data.code);
+    } catch (err) {
+      setAppliedPromo(null);
+      setPromoError(err.message || 'Invalid promo code');
+    } finally {
+      setPromoApplying(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoError('');
+  };
+
   const handlePlaceCodOrder = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
@@ -64,7 +132,7 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
         discountedPrice: item.discountedPrice ?? item.price ?? item.originalPrice,
         price: item.discountedPrice ?? item.price ?? item.originalPrice,
       }));
-      const { order } = await placeCodOrder(payload, getCustomer());
+      const { order } = await placeCodOrder(payload, getCustomer(), appliedPromo?.code || undefined);
       if (typeof onOrderSuccess === 'function') onOrderSuccess();
       navigate(`/checkout/success?cod=1&order_id=${order?.id || ''}`, { replace: true });
     } catch (err) {
@@ -102,11 +170,12 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
         </Link>
 
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-        <p className="text-gray-600 mb-8">Enter your details and place your order. Pay when your order is delivered (Cash on Delivery).</p>
+        <p className="text-gray-600 mb-8">
+          Enter your details and place your order. Pay when your order is delivered (Cash on Delivery).
+        </p>
 
         <form onSubmit={handlePlaceCodOrder}>
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Delivery & contact info */}
             <div className="bg-white rounded-xl shadow-sm border p-6 order-2 md:order-1 space-y-4">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Delivery & contact information</h2>
 
@@ -122,7 +191,6 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                     value={form.name}
                     onChange={update('name')}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
-                    placeholder="Your full name"
                     required
                   />
                 </div>
@@ -140,7 +208,6 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                     value={form.email}
                     onChange={update('email')}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
-                    placeholder="you@example.com"
                     required
                   />
                 </div>
@@ -148,7 +215,7 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
 
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone number <span className="text-red-500">*</span>
+                  Phone <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -158,7 +225,6 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                     value={form.phone}
                     onChange={update('phone')}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
-                    placeholder="e.g. 0300 1234567"
                     required
                   />
                 </div>
@@ -166,7 +232,7 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
 
               <div>
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full address <span className="text-red-500">*</span>
+                  Address <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -174,29 +240,29 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                     id="address"
                     value={form.address}
                     onChange={update('address')}
-                    rows={2}
+                    rows={3}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-biomed-teal focus:border-transparent resize-none"
-                    placeholder="Street, area, city"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                    City
+                  </label>
                   <input
                     id="city"
                     type="text"
                     value={form.city}
                     onChange={update('city')}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
-                    placeholder="City"
                   />
                 </div>
                 <div>
                   <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                    Postal code <span className="text-gray-400 font-normal">(optional)</span>
+                    Postal code
                   </label>
                   <input
                     id="postalCode"
@@ -227,7 +293,6 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
               </div>
             </div>
 
-            {/* Order summary + Pay */}
             <div className="space-y-6 order-1 md:order-2">
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -252,10 +317,64 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t">
-                  <div className="flex justify-between text-lg font-bold">
+
+                <div className="mt-4 pt-4 border-t space-y-3">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal</span>
+                    <span>Rs. {subtotal}</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                      <Tag size={16} />
+                      Promo code
+                    </label>
+                    {appliedPromo ? (
+                      <div className="flex items-center justify-between gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <div>
+                          <p className="text-sm font-semibold text-green-800">{appliedPromo.code}</p>
+                          <p className="text-xs text-green-700">− Rs. {appliedPromo.discount}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemovePromo}
+                          className="text-sm font-medium text-red-600 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={promoInput}
+                          onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 uppercase font-mono text-sm focus:ring-2 focus:ring-biomed-teal focus:border-transparent"
+                          placeholder="Enter code"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyPromo}
+                          disabled={promoApplying}
+                          className="px-4 py-2 bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white rounded-lg text-sm font-semibold"
+                        >
+                          {promoApplying ? '…' : 'Apply'}
+                        </button>
+                      </div>
+                    )}
+                    {promoError && <p className="text-xs text-red-600 mt-1.5">{promoError}</p>}
+                  </div>
+
+                  {promoDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-700 font-medium">
+                      <span>Promo discount</span>
+                      <span>− Rs. {promoDiscount}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between text-lg font-bold pt-1">
                     <span>Total</span>
-                    <span className="text-biomed-teal">Rs. {subtotal}</span>
+                    <span className="text-biomed-teal">Rs. {total}</span>
                   </div>
                 </div>
               </div>
