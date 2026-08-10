@@ -21,6 +21,10 @@ const CheckoutPage = ({ cartItems, onOrderSuccess }) => {
   const [promoError, setPromoError] = useState('');
   const [appliedPromo, setAppliedPromo] = useState(null);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.discountedPrice ?? item.price ?? item.originalPrice ?? 0) * (item.quantity || 1),
     0
