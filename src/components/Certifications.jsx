@@ -20,12 +20,15 @@ const Certifications = () => {
     baseCertificates.map((cert, idx) => (
       <div key={`${keyPrefix}-${idx}`} className="flex-shrink-0 mx-3 md:mx-4">
         <div className="w-16 h-16 md:w-24 md:h-24 bg-white rounded-lg flex items-center justify-center shadow-lg p-2 transition-transform hover:scale-110">
-          <img
-            src={cert}
-            alt={`Certificate ${idx + 1}`}
-            className="w-full h-full object-contain"
-            loading="lazy"
-          />
+              <img
+                src={cert}
+                alt={`Certificate ${idx + 1}`}
+                className="w-full h-full object-contain"
+                loading="lazy"
+                decoding="async"
+                width={96}
+                height={96}
+              />
         </div>
       </div>
     ));

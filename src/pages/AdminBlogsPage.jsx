@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
 import { fetchAdminBlogs, createBlog, updateBlog, deleteBlog, isAdminLoggedIn } from '../api';
-import RichTextEditor from '../components/RichTextEditor';
+
+const RichTextEditor = lazy(() => import('../components/RichTextEditor'));
 
 const CATEGORIES = ['Health', 'Wellness', 'Nutrition', 'Lifestyle', 'Other'];
 
@@ -299,14 +300,16 @@ const AdminBlogsPage = () => {
                 </div>
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Content (rich text – use toolbar for bold, lists, images)</label>
-                  <RichTextEditor
-                    value={formContent ?? ''}
-                    onChange={setFormContent}
-                    placeholder="Write your blog post… You can add images via the image button in the toolbar."
-                    height="320px"
-                    onImageUploadError={(msg) => setError(msg || 'Image upload failed')}
-                    onUploadingChange={setContentUploading}
-                  />
+                  <Suspense fallback={<div className="h-80 border border-gray-200 rounded-lg bg-gray-50 animate-pulse" />}>
+                    <RichTextEditor
+                      value={formContent ?? ''}
+                      onChange={setFormContent}
+                      placeholder="Write your blog post… You can add images via the image button in the toolbar."
+                      height="320px"
+                      onImageUploadError={(msg) => setError(msg || 'Image upload failed')}
+                      onUploadingChange={setContentUploading}
+                    />
+                  </Suspense>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

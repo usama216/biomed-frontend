@@ -5,29 +5,40 @@ import { getProductPrice, productHasUiDiscount, getProductDiscountPercent } from
 import { fetchProducts } from '../api';
 import { productHasCategory } from '../constants/productCategories';
 
-const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null }) => {
+const TrendingProducts = ({
+  addToCart,
+  title = 'TRENDING NOW',
+  categories = null,
+  products: productsProp,
+  loading: loadingProp,
+}) => {
   const scrollContainerRef = useRef(null);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [internalProducts, setInternalProducts] = useState([]);
+  const [internalLoading, setInternalLoading] = useState(productsProp === undefined);
+
+  const isControlled = productsProp !== undefined;
+  const products = isControlled ? productsProp : internalProducts;
+  const loading = isControlled ? Boolean(loadingProp) : internalLoading;
 
   useEffect(() => {
+    if (isControlled) return;
     let cancelled = false;
     (async () => {
-      setLoading(true);
+      setInternalLoading(true);
       try {
         const data = await fetchProducts();
-        if (!cancelled) setProducts(Array.isArray(data) ? data : []);
+        if (!cancelled) setInternalProducts(Array.isArray(data) ? data : []);
       } catch {
-        if (!cancelled) setProducts([]);
+        if (!cancelled) setInternalProducts([]);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setInternalLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isControlled]);
 
   const visibleProducts = categories
     ? products.filter((p) => categories.some((c) => productHasCategory(p, c)))
@@ -99,7 +110,7 @@ const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
+          <div className="flex flex-col items-center justify-center py-16 min-h-[380px]">
             <Loader2 className="w-10 h-10 text-biomed-teal animate-spin mb-4" />
             <p className="text-gray-500 text-lg">Loading products…</p>
           </div>
@@ -129,7 +140,11 @@ const TrendingProducts = ({ addToCart, title = 'TRENDING NOW', categories = null
                       <img
                         src={product.image || product.images[0]}
                         alt={product.name}
+                        width={192}
+                        height={192}
                         className="w-full h-full object-contain hover:scale-105 transition-transform"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <span className="text-gray-400 text-sm">No image</span>

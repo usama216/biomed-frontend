@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -25,13 +25,15 @@ import InternationalPage from './pages/InternationalPage';
 import QualitySafetyPage from './pages/QualitySafetyPage';
 import BecomeDistributorPage from './pages/BecomeDistributorPage';
 import StoreLocatorPage from './pages/StoreLocatorPage';
-import AdminLayout from './components/AdminLayout';
+
+const AdminLayout = lazy(() => import('./components/AdminLayout'));
 
 function AppContent() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
+  const isInitialPageView = useRef(true);
 
   useEffect(() => {
     window.dataLayer = window.dataLayer || [];
@@ -40,8 +42,13 @@ function AppContent() {
       page_path: location.pathname + location.search,
       page_title: document.title,
     });
+    // Deferred pixel fires PageView after load — only track SPA navigations.
     if (typeof window.fbq === 'function') {
-      window.fbq('track', 'PageView');
+      if (isInitialPageView.current) {
+        isInitialPageView.current = false;
+      } else {
+        window.fbq('track', 'PageView');
+      }
     }
   }, [location.pathname, location.search]);
 
@@ -104,7 +111,14 @@ function AppContent() {
           <Route path="/quality-safety" element={<QualitySafetyPage />} />
           <Route path="/become-a-distributor" element={<BecomeDistributorPage />} />
           <Route path="/store-locator" element={<StoreLocatorPage />} />
-          <Route path="/admin/*" element={<AdminLayout />} />
+          <Route
+            path="/admin/*"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+                <AdminLayout />
+              </Suspense>
+            }
+          />
         </Routes>
         {!isAdmin && (
           <>

@@ -2,10 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { fetchBanners } from '../api';
 
+const HERO_SECTION_CLASS =
+  'relative w-full aspect-[16/9] sm:aspect-[21/9] max-h-[min(85vh,720px)] bg-gray-100 overflow-hidden';
+
+const imageUrl = (src) => {
+  if (!src) return '';
+  if (src.startsWith('http')) return src;
+  if (src.startsWith('/')) return src;
+  return `/${src.replace(/^\//, '')}`;
+};
+
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadedIndexes, setLoadedIndexes] = useState(() => new Set([0]));
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +44,18 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    if (slides.length === 0) return;
+    setLoadedIndexes((prev) => {
+      const next = new Set(prev);
+      next.add(currentSlide);
+      next.add((currentSlide + 1) % slides.length);
+      next.add((currentSlide - 1 + slides.length) % slides.length);
+      next.add(0);
+      return next;
+    });
+  }, [currentSlide, slides.length]);
+
+  useEffect(() => {
     if (slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -50,42 +73,63 @@ const Hero = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const imageUrl = (src) => {
-    if (!src) return '';
-    if (src.startsWith('http')) return src;
-    if (src.startsWith('/')) return src;
-    return `/${src.replace(/^\//, '')}`;
-  };
+  useEffect(() => {
+    const first = slides[0];
+    if (!first) return;
+    const href = imageUrl(first);
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = href;
+    link.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(link);
+    return () => {
+      if (link.parentNode) link.parentNode.removeChild(link);
+    };
+  }, [slides]);
 
   if (loading) {
     return (
-      <section className="relative h-[250px] md:h-[110vh] bg-gray-100 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-biomed-teal animate-spin" />
+      <section className={HERO_SECTION_CLASS}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="w-10 h-10 text-biomed-teal animate-spin" />
+        </div>
       </section>
     );
   }
 
   if (slides.length === 0) {
-    return null;
+    return <section className={HERO_SECTION_CLASS} aria-hidden="true" />;
   }
 
   return (
-    <section className="relative h-[250px] md:h-[110vh] overflow-hidden">
+    <section className={HERO_SECTION_CLASS}>
       <div className="absolute inset-0">
-        {slides.map((image, index) => (
-          <div
-            key={`${image}-${index}`}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <img
-              src={imageUrl(image)}
-              alt={`Banner ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
+        {slides.map((image, index) => {
+          const isActive = index === currentSlide;
+          const shouldLoad = loadedIndexes.has(index);
+          return (
+            <div
+              key={`${image}-${index}`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                isActive ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {shouldLoad && (
+                <img
+                  src={imageUrl(image)}
+                  alt={`Banner ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  width={1920}
+                  height={800}
+                  fetchPriority={index === 0 ? 'high' : 'low'}
+                  decoding="async"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {slides.length > 1 && (

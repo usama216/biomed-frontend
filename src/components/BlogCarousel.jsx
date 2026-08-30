@@ -118,8 +118,12 @@ const BlogCarousel = () => {
                     {blog.cover_image_url ? (
                       <img
                         src={imageUrl(blog)}
-                        alt=""
+                        alt={blog.title || 'Blog cover'}
+                        width={320}
+                        height={200}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.style.display = 'none';

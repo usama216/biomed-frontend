@@ -1,69 +1,70 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Hero from '../components/Hero';
 import Certifications from '../components/Certifications';
-import HealthCategories from '../components/HealthCategories';
 import TrendingProducts from '../components/TrendingProducts';
-import HealthConcerns from '../components/HealthConcerns';
 import Mission from '../components/Mission';
-import Science from '../components/Science';
-import LatestOffers from '../components/LatestOffers';
-import WorldwideFootprint from '../components/WorldwideFootprint';
 import BlogCarousel from '../components/BlogCarousel';
 import ProductGridSection from '../components/ProductGridSection';
+import HomeVideoSection from '../components/HomeVideoSection';
 import { OFFER_CATEGORY_OPTIONS } from '../constants/productCategories';
+import { fetchProducts } from '../api';
 
 const HomePage = ({ addToCart }) => {
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setProductsLoading(true);
+      try {
+        const data = await fetchProducts();
+        if (!cancelled) setProducts(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setProducts([]);
+      } finally {
+        if (!cancelled) setProductsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
     <>
       <Hero />
       <Certifications />
-      {/* <HealthCategories /> */}
-      <TrendingProducts addToCart={addToCart} />
+      <TrendingProducts
+        addToCart={addToCart}
+        products={products}
+        loading={productsLoading}
+      />
       <ProductGridSection
         addToCart={addToCart}
         title="BEST SELLING"
         categories={['Best Selling']}
         viewMoreLink="/products"
+        products={products}
+        loading={productsLoading}
       />
       <ProductGridSection
         addToCart={addToCart}
         title="OFFERS & BUNDLES"
         categories={OFFER_CATEGORY_OPTIONS}
         viewMoreLink="/offers"
+        products={products}
+        loading={productsLoading}
       />
-      
-      {/* Video Section */}
-      <section className="py-6 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
-            <video 
-              src="/assets/products/section-video.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto"
-              style={{ pointerEvents: 'none' }}
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
-      </section>
-      
-      {/* <HealthConcerns /> */}
+      <HomeVideoSection />
       <Mission />
       <BlogCarousel />
-      {/* <Science /> */}
-      {/* <LatestOffers addToCart={addToCart} /> */}
-      {/* <WorldwideFootprint /> */}
     </>
   );
 };
 
 export default HomePage;
-
